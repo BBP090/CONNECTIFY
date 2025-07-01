@@ -1,0 +1,35 @@
+create database connectify;
+
+use connectify;
+
+create table user_profile(
+	user_ID int primary key auto_increment,
+    user_name varchar(255) not null,
+    DOB date not null,
+    gender int not null,
+    district varchar(255) not null,
+    city varchar(255) not null,
+    street_address varchar(255) not null,
+    date_created date not null,
+    email_address varchar(255) not null,
+    pwd varchar(255) not null
+);
+
+create table chat(
+	chat_ID int primary key auto_increment,
+	sender_ID int,
+	receiver_ID int,
+    text_message varchar(255),
+    msg_time timestamp,
+    foreign key(from_user_ID) references user_profile(user_ID),
+    foreign key(to_user_ID) references user_profile(user_ID)
+);
+
+create table connections(
+	connection_ID int primary key auto_increment,
+    profile_requestID int,
+    profile_acceptID int,
+    timestamp date,
+    foreign key(profile_requestID) references user_profile(user_ID),
+    foreign key(profile_acceptID) references user_profile(user_ID)
+);
