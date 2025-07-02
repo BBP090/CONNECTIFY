@@ -8,24 +8,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Colors } from "../constants/theme.js"; // adjust the path if needed
 
 const preferencesList = [
-  "Music",
-  "Sports",
-  "Games",
-  "Coding",
-  "Tech",
-  "Art",
-  "Photography",
-  "Movies",
-  "Fitness",
-  "Travel",
-  "Books",
-  "Fashion",
-  "Food",
-  "Nature",
-  "Anime",
-  "Design",
+  "Music", "Sports", "Games", "Coding", "Tech",
+  "Art", "Photography", "Movies", "Fitness", "Travel",
+  "Books", "Fashion", "Food", "Nature", "Anime", "Design",
 ];
 
 export default function PreferencesScreen() {
@@ -37,6 +25,29 @@ export default function PreferencesScreen() {
       setSelectedPreferences(selectedPreferences.filter((i) => i !== item));
     } else {
       setSelectedPreferences([...selectedPreferences, item]);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const allPreferences = [...selectedPreferences];
+    if (otherPreference.trim()) {
+      allPreferences.push(`Other: ${otherPreference.trim()}`);
+    }
+
+    try {
+      const response = await fetch("http://your-api-url/api/user/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "USER_ID_HERE", // replace with real user ID or token
+          preferences: allPreferences,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Preferences saved:", data);
+    } catch (error) {
+      console.error("Error saving preferences:", error);
     }
   };
 
@@ -71,11 +82,11 @@ export default function PreferencesScreen() {
         placeholder="Other interests..."
         value={otherPreference}
         onChangeText={setOtherPreference}
-        placeholderTextColor="#999"
+        placeholderTextColor={Colors.lightGrey}
       />
 
-      <TouchableOpacity style={styles.nextButton}>
-        <Ionicons name="arrow-forward-circle" size={40} color="#490028" />
+      <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
+        <Ionicons name="arrow-forward-circle" size={40} color={Colors.primary} />
       </TouchableOpacity>
     </ScrollView>
   );
@@ -85,13 +96,14 @@ const styles = StyleSheet.create({
   container: {
     padding: 24,
     flexGrow: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
   },
   heading: {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 20,
     textAlign: "center",
+    color: Colors.black,
   },
   preferenceGrid: {
     flexDirection: "row",
@@ -104,27 +116,27 @@ const styles = StyleSheet.create({
     margin: 4,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: Colors.grey,
   },
   selectedItem: {
-    backgroundColor: "#490028",
-    borderColor: "#490028",
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   preferenceText: {
     fontSize: 14,
-    color: "#333",
+    color: Colors.black,
   },
   selectedText: {
-    color: "#fff",
+    color: Colors.white,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: Colors.grey,
     borderRadius: 12,
     padding: 12,
     marginTop: 24,
     fontSize: 16,
-    color: "#333",
+    color: Colors.black,
   },
   nextButton: {
     alignSelf: "flex-end",
