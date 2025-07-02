@@ -26,9 +26,15 @@ const ProfilePage = () => {
       </View>
 
       <View style={styles.photoGrid}>
-        <View style={styles.photoBox} />
-        <View style={styles.photoBox} />
-        <View style={styles.photoBox} />
+        <View style={styles.photoBox}>
+            <Image style={styles.photos} source={require("../../assets/images/bishist.jpg")}/>
+        </View>
+        <View style={styles.photoBox}>
+            <Image style={styles.photos} source={require("../../assets/images/jatin.png")}/>
+        </View>
+        <View style={styles.photoBox}>
+            <Image style={styles.photos} source={require("../../assets/images/prabin.png")}/>
+        </View>
       </View>
     </ScrollView>
   );
@@ -97,16 +103,17 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   photosTab: {
-    borderTopWidth: 2,
+    backgroundColor:"#28a745",
     borderBottomWidth: 2,
-    paddingVertical: 10,
+    padding: 10,
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'left',
     marginBottom: 10,
   },
   photosTabText: {
     fontSize: 16,
     fontWeight: '500',
+    color: "#ffffff"
   },
   photoGrid: {
     flexDirection: 'row',
@@ -115,11 +122,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   photoBox: {
-    width: 90,
-    height: 120,
-    borderWidth: 1,
-    borderColor: '#000',
+    width: 130,
+    height: 150,
   },
+  photos:{
+    width: 130,
+    height: 150,
+  }
 });
 
 export default ProfilePage;

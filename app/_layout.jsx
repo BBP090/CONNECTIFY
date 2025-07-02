@@ -1,5 +1,4 @@
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
   return (
@@ -7,7 +6,7 @@ export default function RootLayout() {
     {/* <StatusBar style="light" /> */}
       <Stack screenOptions={
         headerStyle={
-          backgroundColor: "grey",
+          backgroundColor: "white",
         }
       }>
         {/* <Stack.Screen name="loginForm" options={{
