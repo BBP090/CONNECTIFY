@@ -19,7 +19,7 @@ export default function Home() {
         });
 
         if (!result.canceled) {
-            setSelectedImage(result.assets[0].uri);
+            setSehlectedImage(result.assets[0].uri);
             setShowAppOptions(true);
             console.log(result);
         } else {
