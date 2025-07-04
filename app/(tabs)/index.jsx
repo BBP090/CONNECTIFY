@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
-import { useState } from "react";
-import ImageViewer from "@/components/ImageViewer";
-import Button from "@/components/Button"
 import * as ImagePicker from "expo-image-picker";
-import IconButton from "@/components/IconButton";
-import CircleButton from "@/components/CircleButton";
-import EmojiPicker from "@/components/EmojiPicker";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import Button from "../../components/Button";
+import CircleButton from "../../components/CircleButton";
+import EmojiPicker from "../../components/EmojiPicker";
+import IconButton from "../../components/IconButton";
+import ImageViewer from "../../components/ImageViewer";
 
 // No need for Link as we have tabs at the botton for navigation
 
