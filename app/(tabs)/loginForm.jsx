@@ -1,5 +1,5 @@
-import { View, TextInput, StyleSheet, Text } from "react-native";
-import Button from "@/components/Button";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import Button from "../../components/Button";
 
 export default function loginForm() {
     return (
