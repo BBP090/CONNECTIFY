@@ -20,6 +20,10 @@ export default function TabsLayout() {
                 headerTitle: "Connectify",
                 headerTintColor: "black",
             }} />
+            <Tabs.Screen name="Home" options={{
+                headerTitle: "Connectify",
+                headerTintColor: "black",
+            }} />
             <Tabs.Screen name="index" options={{
                 headerTitle: "Home",
                 tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? "home-sharp" : "home-outline"} color={color} size={20} />,

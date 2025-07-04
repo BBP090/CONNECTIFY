@@ -1,18 +1,19 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   return (
-    <>
-    {/* <StatusBar style="light" /> */}
+    <GestureHandlerRootView style={{ flex: 1 }}>  {/*for gestures to work in our app we need to wrap the entry point of our app with 'GestureHandlerRootView' */}
+      {/* <StatusBar style="light" /> */}
       <Stack screenOptions={
-        headerStyle={
+        headerStyle = {
           backgroundColor: "grey",
         }
       }>
         {/* <Stack.Screen name="loginForm" options={{
           headerTitle: "Connectify",
-        }} /> */}
+          }} /> */}
         <Stack.Screen name="(tabs)" options={{
           headerShown: false,
         }} />
@@ -21,7 +22,7 @@ export default function RootLayout() {
           headerShown: false,
         }} />
       </Stack>
-    </>
+    </GestureHandlerRootView>
   );
 }
 
