@@ -1,5 +1,6 @@
 import { View, ScrollView, Text, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
+import { Platform } from 'react-native';
 import { useState } from 'react';
 import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
 import UserProfileFeed from '../../components/UserProfileFeed';
@@ -16,15 +17,6 @@ export default function Home() {
         Poppins_500Medium,
         Poppins_400Regular
     });
-    const [status, setStatus] = useState(null);
-
-    const accept = () => {
-        setStatus(true);
-    };
-
-    const remove = () => {
-        setStatus(false);
-    }
 
     if (!fontsLoaded) {
         return null;
@@ -32,46 +24,24 @@ export default function Home() {
 
     return (
         <>
-            <View style={{ backgroundColor: "#FAEBD7" }}>
-                <ScrollView
-                    horizontal
-                    contentContainerStyle={styles.tagsContainer}
-                >
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                    <FeedTags tagLabel="Football" />
-                </ScrollView>
+            <View style={styles.tagsContainer}>
+                    <FeedTags />
             </View>
             <ScrollView>
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
                     userName={user_name}
-                    status={status}
-                    accept={accept}
-                    remove={remove}
                 />
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
                     userName={user_name}
-                    status={status}
-                    accept={accept}
-                    remove={remove}
                 />
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
                     userName={user_name}
-                    status={status}
-                    accept={accept}
-                    remove={remove}
                 />
             </ScrollView>
         </>
@@ -81,8 +51,9 @@ export default function Home() {
 const styles = StyleSheet.create({
 
     tagsContainer: {
-        marginTop: 8,
-        marginBottom: 8,
+        backgroundColor: "white",
+        paddingTop: 8,
+        paddingBottom: 8,
         justifyContent: "space-between"
     },
 

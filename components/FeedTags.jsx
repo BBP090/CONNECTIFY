@@ -1,23 +1,42 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList } from 'react-native';
+import { Platform } from 'react-native';
 import { useState } from 'react';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming
+} from 'react-native-reanimated';
 
-export default function FeedTags({ tagLabel }) {
-    const [tagButtonColor, setTagButtonColor] = useState("#FAEBD7")
-
-    const onPress = () => {
-        if (!(tagButtonColor === "#00FF7F")) {
-            setTagButtonColor("#00FF7F");
-        } else {
-            setTagButtonColor("#FAEBD7");
-        }
-    };
+export default function FeedTags() {
+    const tags = ["football", "basketball", "volleyball", "basketball", "basketball", "basketball", "basketball", "basketball"];
+    const [selectedTags, setSelectedTags] = useState([]);
+    console.log(selectedTags);
 
     return (
-        <Pressable
-            style={[styles.preferenceTagsButton, { backgroundColor: tagButtonColor }]}
-            onPress={onPress}>
-            <Text style={styles.tags}>{tagLabel}</Text>
-        </Pressable>
+        <FlatList
+            horizontal
+            data={tags}
+            showsHorizontalScrollIndicator={Platform.OS === "web"}
+            renderItem={({ item }) => {
+                const isSelected = selectedTags.includes(item);
+                const checker = () => {
+                    if (isSelected) {
+                        setSelectedTags(selectedTags.filter((currentValue) => currentValue != item));
+                    } else {
+                        setSelectedTags([...selectedTags, item]);
+                    }
+                };
+                return (
+                    <Pressable
+                        style={[styles.preferenceTagsButton, { color: isSelected ? "white" : "black", backgroundColor: isSelected ? "#FAEBD7" : "white" }]}
+                        onPress={checker} key={item}>
+                        <Text style={styles.tags}>{item}</Text>
+                    </Pressable>
+                )
+            }}
+        />
     );
 }
 

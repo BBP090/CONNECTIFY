@@ -1,18 +1,19 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import RequestButton from './RequestButton';
-import IconButton from './IconButton';
 
 // const placeHolderImage = require("../../assets/images/background.png");
 
-export default function UserProfileFeed({ smallImgSource, userName, profileFeedImgSource, status, accept, remove }) {
+export default function UserProfileFeed({ smallImgSource, userName, profileFeedImgSource }) {
+    const [status, setStatus] = useState(null);
 
     if (status === null) {
         return (
             <View style={{marginBottom: 10}}>
                 <LinearGradient
-                    colors={["#FAEBD7", "#fff"]}
+                    colors={["#fff", "#fff"]}
                     style={styles.border}
                 >
                     <View style={styles.userFeed1}>
@@ -26,9 +27,9 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
                         </View>
                         <View style={styles.buttonContainer}>
-                            <RequestButton onPress={remove} iconName="remove-circle-outline" label="Remove" iconColor="red" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                            <RequestButton onPress={()=>{setStatus(false)}} iconName="remove-circle-outline" label="Remove" iconColor="red" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                             <View style={{ width: 2, height: '100%', backgroundColor: '#000', marginHorizontal: 1 }} />
-                            <RequestButton onPress={accept} iconName="check-circle-outline" label="Accept" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                            <RequestButton onPress={()=>{setStatus(true)}} iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                         </View>
                     </View>
                 </LinearGradient>
@@ -38,7 +39,7 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
         return (
             <View style={{marginBottom: 10}}>
                 <LinearGradient
-                    colors={["#FAEBD7", "#ffff"]}
+                    colors={["#fff", "#ffff"]}
                     style={styles.border}
                 >
                     <View style={styles.userFeed1}>
@@ -52,14 +53,16 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
                         </View>
                         <View style={styles.buttonContainer}>
-                            <RequestButton iconName="check-circle" label="Accepted" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
+                            <RequestButton iconName="check-circle" label="Request Sent!" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
                         </View>
                     </View>
                 </LinearGradient>
             </View>
         );
     } else {
-        return null;
+        return(
+            null
+        );
     }
 }
 
