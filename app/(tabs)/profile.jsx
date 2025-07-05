@@ -103,17 +103,23 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   photosTab: {
-    backgroundColor:"#28a745",
-    borderBottomWidth: 2,
-    padding: 10,
-    width: '100%',
-    alignItems: 'left',
+    // backgroundColor:"#28a745",
+    width: '20%',
+    alignItems: 'center',
     marginBottom: 10,
+    borderBottomColor:'#000',
+    borderBottomWidth:1,
+    paddingTop: 20,
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingBottom: 5,
   },
   photosTabText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: "#ffffff"
+    // fontWeight: '500',
+    color: "#000",
+    // textDecorationLine:'underline', 
+    fontFamily:'Instagram Sans Bold.ttf'   
   },
   photoGrid: {
     flexDirection: 'row',
