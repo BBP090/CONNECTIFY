@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { Colors } from "../constants/theme";
+import { Colors } from "./constants/theme";
 
 export default function SettingsScreen() {
   const [showChangePassword, setShowChangePassword] = useState(false);
