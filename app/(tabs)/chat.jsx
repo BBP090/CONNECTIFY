@@ -20,14 +20,14 @@ const MessageScreen = () => {
     {
       id: "1",
       name: "Aayush Sharma",
-      image: "https://randomuser.me/api/portraits/men/75.jpg",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrmzAf4-rCEcXr2HB664ssYWrQqcLX-S9Udw&s",
       message: "Hey! I’d like to chat with you.",
       timestamp: new Date("2025-07-02T10:30:00"),
     },
     {
       id: "2",
       name: "Pooja Karki",
-      image: "https://randomuser.me/api/portraits/women/60.jpg",
+      image: "https://c8.alamy.com/comp/2B7HT50/portraits-of-people-pokhara-nepal-2B7HT50.jpg",
       message: "Hello 👋",
       timestamp: new Date("2025-07-02T09:15:00"),
     },
@@ -37,7 +37,7 @@ const MessageScreen = () => {
     {
       id: "3",
       name: "Sujan Anand",
-      image: "https://randomuser.me/api/portraits/men/31.jpg",
+      image: "https://media.istockphoto.com/id/583710772/photo/man-looking-at-camera.jpg?s=612x612&w=0&k=20&c=S0sW-8RJnc61XMIvM6Y9_M1E5J5HQk4v0hK5V5DQCgM=",
       message: "Let's meet at 5pm today.",
       timestamp: new Date("2025-07-01T18:45:00"),
     },
