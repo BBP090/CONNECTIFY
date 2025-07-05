@@ -1,20 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useTheme } from './contexts/ThemeContext';
 import {
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Colors } from "../constants/theme";
+import { useState } from "react";
+import { Colors } from "./constants/theme";
 
 export default function SettingsScreen() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [logoutVisible, setLogoutVisible] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme, colors } = useTheme();
+
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -44,10 +46,11 @@ export default function SettingsScreen() {
     // Add logout logic here
   };
 
-  const bgColor = darkMode ? "#000" : Colors.white;
-  const textColor = darkMode ? Colors.white : Colors.black;
-  const inputBg = darkMode ? "#1a1a1a" : Colors.white;
-  const borderColor = darkMode ? "#333" : Colors.grey;
+  const bgColor = colors.background;
+  const textColor = colors.text;
+  const inputBg = colors.input;
+  const borderColor = colors.border;
+
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: bgColor }]}>
@@ -107,12 +110,14 @@ export default function SettingsScreen() {
       {/* Theme Toggle Option */}
       <TouchableOpacity
         style={styles.optionRow}
-        onPress={() => setDarkMode(!darkMode)}
+        onPress={toggleTheme}
       >
+
         <Ionicons name="moon-outline" size={24} color={Colors.primary} />
         <Text style={[styles.optionText, { color: textColor }]}>
-          {darkMode ? "Dark Mode" : "Light Mode"}
+          {isDarkMode ? "Dark Mode" : "Light Mode"}
         </Text>
+
         <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
       </TouchableOpacity>
 

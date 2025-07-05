@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
+import { ThemeProvider } from "./contexts/ThemeContext"; // ✅ Adjust path as needed
+
 
 export default function RootLayout() {
   return (
-    <>
+    <ThemeProvider>
     {/* <StatusBar style="light" /> */}
       <Stack screenOptions={
         headerStyle={
@@ -20,7 +22,7 @@ export default function RootLayout() {
           headerShown: false,
         }} />
       </Stack>
-    </>
+    </ThemeProvider>
   );
 }
 

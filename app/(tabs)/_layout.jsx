@@ -1,10 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import  {useRouter, Tabs } from "expo-router";
 import { TouchableOpacity } from 'react-native';
+import { ThemeProvider } from "../contexts/ThemeContext"; // ✅ Adjust path as needed
+
 
 
 export default function TabsLayout() {
+    const router = useRouter();
     return (
+        <ThemeProvider>
         <Tabs
             screenOptions={{
                 tabBarActiveTintColor: "#1a1aff",
@@ -32,15 +36,20 @@ export default function TabsLayout() {
                     headerTitle: "Chats",
                     tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? "chatbubble-sharp" : "chatbubble-outline"} color={color} size={20} />
                 }} />
-            <Tabs.Screen name="profile" 
-             options={{
-                headerTitle: "Profile",
+             <Tabs.Screen
+                name="profile"
+                options={{
+                headerTitle: 'Profile',
                 headerRight: () => (
-                    <TouchableOpacity onPress={() => alert('Settings pressed')} style={{ marginRight: 15 }}>
-                        <Ionicons name="settings-outline" size={24} color="black" />
-                    </TouchableOpacity>
-                ),
-             }}
-            />
-        </Tabs>);
+                <TouchableOpacity
+                onPress={() => router.push('/setting')}
+                style={{ marginRight: 15 }}
+                >
+              <Ionicons name="settings-outline" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+        </Tabs>
+        </ThemeProvider>);
 }
