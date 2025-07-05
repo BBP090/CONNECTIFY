@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import { TouchableOpacity } from 'react-native';
+const router = useRouter();
 
 export default function TabsLayout() {
     return (

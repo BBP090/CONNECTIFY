@@ -1,5 +1,4 @@
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
 const ProfilePage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
