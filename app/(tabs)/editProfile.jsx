@@ -117,6 +117,7 @@ const [dobDay, setDobDay] = useState('');
         value={contact}
         onChangeText={setContact}
         keyboardType="phone-pad"
+        underlineColorAndroid="transparent"  // ✅ This removes Android underline
       />
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -150,15 +151,16 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   input: {
-    borderWidth: 1,
+    borderBottomWidth: 1,
     borderColor: Colors.grey,
-    borderRadius: 8,
+    borderRadius: 0,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginBottom: 10,
     flex: 1,
     minWidth: '30%',
     color: Colors.black,
+    
   },
   radioGroup: {
     marginBottom: 10,
