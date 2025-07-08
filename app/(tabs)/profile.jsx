@@ -4,7 +4,7 @@ const ProfilePage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCircle}>
-        <Image style={styles.profileImage} source={require("../../assets/images/pfp.png")} />
+        <Image style={styles.profileImage} source={require("../../assets/images/background.png")} />
         <Text style={styles.editProfile}>Edit Profile</Text>
       </View>
 
@@ -27,13 +27,13 @@ const ProfilePage = () => {
 
       <View style={styles.photoGrid}>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/bishist.jpg")} />
+          <Image style={styles.photos} source={require("../../assets/images/emoji1.png")} />
         </View>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/jatin.png")} />
+          <Image style={styles.photos} source={require("../../assets/images/emoji2.png")} />
         </View>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/prabin.png")} />
+          <Image style={styles.photos} source={require("../../assets/images/emoji3.png")} />
         </View>
       </View>
     </ScrollView>

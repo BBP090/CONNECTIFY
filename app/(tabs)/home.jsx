@@ -1,7 +1,7 @@
 import { View, ScrollView, Text, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Platform } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
 import UserProfileFeed from '../../components/UserProfileFeed';
 import FeedTags from '../../components/FeedTags';
@@ -12,6 +12,18 @@ const profileFeedImgSource = require("../../assets/images/background.png");
 const user_name = "Bishist Bikram Pant"
 
 export default function Home() {
+    
+    const [data, setData]=useState(undefined);
+
+    const getAPI= async ()=>{
+        const file = "../my-app/data.json";
+        let result = await fetch(file);
+        result = await result.json();
+        setData(result);
+    }
+
+    useEffect(()=>{getAPI()}, [])
+
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold,
         Poppins_500Medium,
@@ -31,7 +43,7 @@ export default function Home() {
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
-                    userName={user_name}
+                    userName={data.UserName}
                 />
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
