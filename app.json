@@ -24,9 +24,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",{
-        "root": ".app/ChatRoom"
-      },
+      "expo-router",
       [
         "expo-splash-screen",
         {
