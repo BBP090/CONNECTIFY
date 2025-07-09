@@ -11,6 +11,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.1",
+    "@expo-google-fonts/poppins": "^0.4.0",
     "@expo/vector-icons": "^14.1.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
@@ -20,7 +22,7 @@
     "expo": "53.0.13",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
-    "expo-font": "~13.3.1",
+    "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.3.0",
     "expo-image-picker": "~16.1.4",
@@ -45,7 +47,12 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
+<<<<<<< HEAD
+    "react-native-webview": "13.13.5",
+    "expo-linear-gradient": "~14.1.5"
+=======
     "react-native-webview": "13.13.5"
+>>>>>>> e8bfd07c67d2aa5470d8b5036a6ba2f55378bad5
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

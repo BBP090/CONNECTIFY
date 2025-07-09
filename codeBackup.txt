@@ -1,0 +1,60 @@
+<View style={styles.userFeed}>
+            <View style={styles.userFeed1}>
+                <View style={styles.profileTitleContainer}>
+                    <Image source={placeHolderImage} style={styles.profileSmallImage}></Image>
+                    <View style={styles.profileUserNameContainer}>
+                        <Text style={styles.profileUserName}>User_name</Text>
+                    </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                    <Image source={placeHolderImage}
+                        style={styles.profileFeedImage}></Image>
+                </View>
+                <View style={{ flexDirection: "row", justifyContent: "space-around", padding: 6 }}>
+                    <RequestButton buttonContainerColor={{ backgroundColor: "red" }} iconName="remove" label="Remove" iconColor="white" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                    <View style={{ width: 2, height: '100%', backgroundColor: '#000', marginHorizontal: 1 }} />
+                    <RequestButton buttonContainerColor={{ backgroundColor: "green" }} iconName="done" label="Accept" iconColor="white" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                </View>
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    userFeed: {
+    },
+
+    userFeed1: {
+        borderWidth: 2,
+        borderRadius: 5,
+        width: '100%',
+        height: 650
+    },
+
+    profileTitleContainer: {
+        flexDirection: "row",
+        padding: 5,
+        paddingLeft: 2
+    },
+
+    profileUserNameContainer: {
+        justifyContent: "center",
+        marginHorizontal: 5
+    },
+
+    profileUserName: {
+        fontSize: 15,
+        fontFamily: "Poppins_600SemiBold"
+    },
+
+    profileSmallImage: {
+        borderRadius: 20,
+        width: 40,
+        height: 40
+    },
+
+    profileFeedImage: {
+        width: '100%',
+        height: '100%'
+    },
+});

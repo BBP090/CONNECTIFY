@@ -27,13 +27,13 @@ const ProfilePage = () => {
 
       <View style={styles.photoGrid}>
         <View style={styles.photoBox}>
-            <Image style={styles.photos} source={require("../../assets/images/bishist.jpg")}/>
+          <Image style={styles.photos} source={require("../../assets/images/emoji1.png")} />
         </View>
         <View style={styles.photoBox}>
-            <Image style={styles.photos} source={require("../../assets/images/jatin.png")}/>
+          <Image style={styles.photos} source={require("../../assets/images/emoji2.png")} />
         </View>
         <View style={styles.photoBox}>
-            <Image style={styles.photos} source={require("../../assets/images/prabin.png")}/>
+          <Image style={styles.photos} source={require("../../assets/images/emoji3.png")} />
         </View>
       </View>
     </ScrollView>
@@ -57,18 +57,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   profileImage: {
-  width: 120,
-  height: 120,
-  borderRadius: 60,
-  //borderWidth: 3,
-  borderColor: '#000',
-  resizeMode: 'cover', // or 'contain'
-},
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    //borderWidth: 3,
+    borderColor: '#000',
+    resizeMode: 'cover', // or 'contain'
+  },
   editProfile: {
+    marginHorizontal:10,
     fontSize: 16,
     color: '#333',
     marginVertical: 5,
-    margin:10
   },
   username: {
     fontSize: 18,
@@ -110,8 +110,8 @@ const styles = StyleSheet.create({
     width: '20%',
     alignItems: 'center',
     marginBottom: 10,
-    borderBottomColor:'#000',
-    borderBottomWidth:1,
+    borderBottomColor: '#000',
+    borderBottomWidth: 1,
     paddingTop: 20,
     paddingLeft: 15,
     paddingRight: 15,
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     // fontWeight: '500',
     color: "#000",
     // textDecorationLine:'underline', 
-    fontFamily:'Instagram Sans Bold.ttf'   
+    fontFamily: 'Instagram Sans Bold.ttf'
   },
   photoGrid: {
     flexDirection: 'row',
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 150,
   },
-  photos:{
+  photos: {
     width: 130,
     height: 150,
   }

@@ -1,11 +1,13 @@
-import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Button from "../../components/Button";
-import CircleButton from "../../components/CircleButton";
-import EmojiPicker from "../../components/EmojiPicker";
-import IconButton from "../../components/IconButton";
-import ImageViewer from "../../components/ImageViewer";
+import { useState } from "react";
+import ImageViewer from "@/components/ImageViewer";
+import Button from "@/components/Button"
+import * as ImagePicker from "expo-image-picker";
+import IconButton from "@/components/IconButton";
+import CircleButton from "@/components/CircleButton";
+import EmojiPicker from "@/components/EmojiPicker";
+import EmojiList from "@/components/EmojiList";
+import EmojiSticker from "@/components/EmojiSticker";
 
 // No need for Link as we have tabs at the botton for navigation
 
@@ -15,6 +17,7 @@ export default function Home() {
     const [selectedImage, setSelectedImage] = useState(undefined); //to store the uri of the selected image so that, it can be displayed on the screen
     const [showAppOptions, setShowAppOptions] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [pickedEmoji, setPickedEmoji] = useState(undefined);
 
     const pickImageAsync = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -35,7 +38,7 @@ export default function Home() {
         setShowAppOptions(false);
     };
 
-    const onModalClose=()=>{
+    const onModalClose = () => {
         setIsModalVisible(false);
     }
 
@@ -51,6 +54,12 @@ export default function Home() {
         <View style={styles.container}>
             <View style={styles.imgContainer}>
                 <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} altText="Background Image" />
+                {pickedEmoji &&
+                    (
+                        <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
+                    )
+                } 
+                {/* this prevents undefined source for image */}
             </View>
             {showAppOptions ?
                 (
@@ -67,9 +76,9 @@ export default function Home() {
                         <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
                     </View>
                 )}
-        <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
-            <></>
-        </EmojiPicker>
+            <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
+                <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+            </EmojiPicker>
         </View>
     );
 }
