@@ -12,17 +12,18 @@ const profileFeedImgSource = require("../../assets/images/background.png");
 const user_name = "Bishist Bikram Pant"
 
 export default function Home() {
-    
-    const [data, setData]=useState(undefined);
 
-    const getAPI= async ()=>{
-        const file = "../my-app/data.json";
+    const [data, setData] = useState(undefined);
+
+    const getAPI = async () => {
+        const file = "https://jsonplaceholder.typicode.com/posts/1";
         let result = await fetch(file);
         result = await result.json();
         setData(result);
+        console.warn(result);
     }
 
-    useEffect(()=>{getAPI()}, [])
+    useEffect(() => { getAPI() }, [])
 
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold,
@@ -37,13 +38,13 @@ export default function Home() {
     return (
         <>
             <View style={styles.tagsContainer}>
-                    <FeedTags />
+                <FeedTags />
             </View>
             <ScrollView>
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
-                    userName={data.UserName}
+                    userName={data.title}
                 />
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
