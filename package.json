@@ -17,6 +17,8 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "expo": "53.0.13",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.6",
@@ -32,16 +34,25 @@
     "expo-system-ui": "~5.0.9",
     "expo-updates": "~0.28.15",
     "expo-web-browser": "~14.2.0",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1",
+    "nodemon": "^3.1.10",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.4",
+    "react-native-emoji-selector": "^0.2.0",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-paper": "^5.14.5",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
+<<<<<<< HEAD
     "react-native-webview": "13.13.5",
     "expo-linear-gradient": "~14.1.5"
+=======
+    "react-native-webview": "13.13.5"
+>>>>>>> e8bfd07c67d2aa5470d8b5036a6ba2f55378bad5
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

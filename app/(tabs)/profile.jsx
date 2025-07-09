@@ -1,13 +1,13 @@
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+import { useRouter } from 'expo-router';
+const router = useRouter();
 const ProfilePage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCircle}>
-        <Image style={styles.profileImage} source={require("../../assets/images/background.png")} />
-        <Text style={styles.editProfile}>Edit Profile</Text>
+        <Image  style={styles.profileImage} source={require("../../assets/images/pfp.png")}/>
+        <TouchableOpacity><Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text></TouchableOpacity>
       </View>
-
       <Text style={styles.username}>Username</Text>
 
       <TouchableOpacity style={styles.connectButton}>
@@ -17,7 +17,7 @@ const ProfilePage = () => {
 
       <View style={styles.bioContainer}>
         <Text>
-          Bio here
+            Bio here
         </Text>
       </View>
 
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   profileCircle: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems:'center',
     width: 120,
     height: 120,
     borderRadius: 60,
