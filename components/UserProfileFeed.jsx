@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
+import { Platform } from 'react-native';
 import RequestButton from './RequestButton';
 
 // const placeHolderImage = require("../../assets/images/background.png");
@@ -10,13 +11,13 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
     const [status, setStatus] = useState(null);
 
     if (status === null) {
+        console.log(status);
         return (
-            <View style={{marginBottom: 10}}>
                 <LinearGradient
                     colors={["#fff", "#fff"]}
                     style={styles.border}
                 >
-                    <View style={styles.userFeed1}>
+                    <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
                         <View style={styles.profileTitleContainer}>
                             <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
                             <View style={styles.profileUserNameContainer}>
@@ -27,40 +28,38 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
                         </View>
                         <View style={styles.buttonContainer}>
-                            <RequestButton onPress={()=>{setStatus(false)}} iconName="remove-circle-outline" label="Remove" iconColor="red" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                            <RequestButton onPress={() => { setStatus(false) }} iconName="remove-circle-outline" label="Remove" iconColor="red" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                             <View style={{ width: 2, height: '100%', backgroundColor: '#000', marginHorizontal: 1 }} />
-                            <RequestButton onPress={()=>{setStatus(true)}} iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                            <RequestButton onPress={() => { setStatus(true) }} iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                         </View>
                     </View>
                 </LinearGradient>
-            </View>
         );
     } else if (status === true) {
+        console.log(status);
         return (
-            <View style={{marginBottom: 10}}>
-                <LinearGradient
-                    colors={["#fff", "#ffff"]}
-                    style={styles.border}
-                >
-                    <View style={styles.userFeed1}>
-                        <View style={styles.profileTitleContainer}>
-                            <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
-                            <View style={styles.profileUserNameContainer}>
-                                <Text style={[styles.profileUserName]}>{userName}</Text>
-                            </View>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <RequestButton iconName="check-circle" label="Request Sent!" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
+            <LinearGradient
+                colors={["#fff", "#ffff"]}
+                style={styles.border}
+            >
+                <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
+                    <View style={styles.profileTitleContainer}>
+                        <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
+                        <View style={styles.profileUserNameContainer}>
+                            <Text style={[styles.profileUserName]}>{userName}</Text>
                         </View>
                     </View>
-                </LinearGradient>
-            </View>
+                    <View style={{ flex: 1 }}>
+                        <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                        <RequestButton iconName="check-circle" label="Request Sent!" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
+                    </View>
+                </View>
+            </LinearGradient>
         );
     } else {
-        return(
+        return (
             null
         );
     }
@@ -69,8 +68,10 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
 const styles = StyleSheet.create({
 
     border: {
-        padding: 3,
-        borderTopEndRadius: 10
+        marginTop: 10,
+        padding: 10,
+        paddingBottom: 5,
+        borderRadius: 10,
     },
 
     userFeed1: {

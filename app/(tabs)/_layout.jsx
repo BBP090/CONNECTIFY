@@ -20,6 +20,7 @@ export default function TabsLayout() {
                     headerShadowVisible: true,
                     headerTintColor: "black",
                     tabBarStyle: {
+                        marginTop: 10,
                         backgroundColor: "black",
                     }
                 }}>
