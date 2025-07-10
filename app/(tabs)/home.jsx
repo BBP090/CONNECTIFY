@@ -40,7 +40,9 @@ export default function Home() {
             <View style={styles.tagsContainer}>
                 <FeedTags />
             </View>
-            <ScrollView>
+            <ScrollView
+                contentContainerStyle={Platform.OS === "web" && { alignItems: "center" }}
+            >
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}

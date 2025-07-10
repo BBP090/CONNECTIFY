@@ -70,7 +70,6 @@ const styles = StyleSheet.create({
     border: {
         marginTop: 10,
         padding: 10,
-        paddingBottom: 5,
         borderRadius: 10,
     },
 
