@@ -20,7 +20,8 @@ export default function TabsLayout() {
                     headerShadowVisible: true,
                     headerTintColor: "black",
                     tabBarStyle: {
-                        backgroundColor: "black",
+                        marginTop: 10,
+                        backgroundColor: "black"
                     }
                 }}>
                 <Tabs.Screen name="loginForm" options={{
