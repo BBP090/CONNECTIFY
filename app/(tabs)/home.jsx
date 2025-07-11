@@ -46,7 +46,7 @@ export default function Home() {
                 <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
-                    userName={data.title}
+                    userName={user_name}
                 />
                 <UserProfileFeed
                     smallImgSource={smallImgSource}

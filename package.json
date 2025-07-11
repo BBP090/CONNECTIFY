@@ -47,12 +47,8 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
-<<<<<<< HEAD
     "react-native-webview": "13.13.5",
     "expo-linear-gradient": "~14.1.5"
-=======
-    "react-native-webview": "13.13.5"
->>>>>>> e8bfd07c67d2aa5470d8b5036a6ba2f55378bad5
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

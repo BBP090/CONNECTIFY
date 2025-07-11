@@ -16,12 +16,12 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      {/* <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Heading */}
-      <Text style={styles.title}>Hey,{"\n"}<Text style={styles.bold}>Welcome Back</Text></Text>
+      <Text style={[styles.title, styles.bold]}>Hey,{"\n"}<Text style={styles.bold}>Welcome Back</Text></Text>
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>Please login to continue</Text>
