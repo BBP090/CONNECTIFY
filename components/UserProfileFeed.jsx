@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Platform } from 'react-native';
 import RequestButton from './RequestButton';
 
 // const placeHolderImage = require("../../assets/images/background.png");
