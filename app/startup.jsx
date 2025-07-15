@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+
 export default function StartupScreen({ navigation }) {
   return (
     <View style={styles.container}>
