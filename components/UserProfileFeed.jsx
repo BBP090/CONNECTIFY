@@ -68,7 +68,6 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
 const styles = StyleSheet.create({
 
     border: {
-        marginTop: 10,
         padding: 10,
         borderRadius: 10,
     },

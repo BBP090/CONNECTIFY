@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Colors } from "../constants/theme.js"; // adjust the path if needed
+import { Colors } from "./constants/theme.js"; // adjust the path if needed
 
 const preferencesList = [
   "Music", "Sports", "Games", "Coding", "Tech",

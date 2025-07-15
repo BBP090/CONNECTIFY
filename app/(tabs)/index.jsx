@@ -1,112 +1,90 @@
-// import { StyleSheet, View } from "react-native";
-// import { useState } from "react";
-// import ImageViewer from "@/components/ImageViewer";
-// import Button from "@/components/Button"
-// import * as ImagePicker from "expo-image-picker";
-// import IconButton from "@/components/IconButton";
-// import CircleButton from "@/components/CircleButton";
-// import EmojiPicker from "@/components/EmojiPicker";
-// import EmojiList from "@/components/EmojiList";
-// import EmojiSticker from "@/components/EmojiSticker";
+import { View, ScrollView, Text, StyleSheet, Pressable } from 'react-native';
+import { Image } from 'expo-image';
+import { Platform } from 'react-native';
+import { useState, useEffect } from 'react';
+import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
+import UserProfileFeed from '../../components/UserProfileFeed';
+import FeedTags from '../../components/FeedTags';
 
-// // No need for Link as we have tabs at the botton for navigation
+// const placeHolderImage = require("../../assets/image/background.png");
+const smallImgSource = require("../../assets/images/background.png");
+const profileFeedImgSource = require("../../assets/images/background.png");
+const user_name = "Bishist Bikram Pant"
 
-// const PlaceholderImage = require("../../assets/images/background.png");
+export default function Home() {
 
-// export default function Home() {
-//     const [selectedImage, setSelectedImage] = useState(undefined); //to store the uri of the selected image so that, it can be displayed on the screen
-//     const [showAppOptions, setShowAppOptions] = useState(false);
-//     const [isModalVisible, setIsModalVisible] = useState(false);
-//     const [pickedEmoji, setPickedEmoji] = useState(undefined);
+    const [data, setData] = useState(undefined);
 
-//     const pickImageAsync = async () => {
-//         let result = await ImagePicker.launchImageLibraryAsync({
-//             allowsEditing: true,
-//             quality: 1
-//         });
+    const getAPI = async () => {
+        const file = "https://jsonplaceholder.typicode.com/posts/1";
+        let result = await fetch(file);
+        result = await result.json();
+        setData(result);
+        console.warn(result);
+    }
 
-//         if (!result.canceled) {
-//             setSelectedImage(result.assets[0].uri);
-//             setShowAppOptions(true);
-//             console.log(result);
-//         } else {
-//             alert("You did not select any image.");
-//         }
-//     };
+    useEffect(() => { getAPI() }, [])
 
-//     const onReset = () => {
-//         setShowAppOptions(false);
-//     };
+    const [fontsLoaded] = useFonts({
+        Poppins_600SemiBold,
+        Poppins_500Medium,
+        Poppins_400Regular
+    });
 
-//     const onModalClose = () => {
-//         setIsModalVisible(false);
-//     }
+    if (!fontsLoaded) {
+        return null;
+    }
 
-//     const onAddSticker = () => {
-//         setIsModalVisible(true);
-//     };
+    return (
+        <>
+            <View style={styles.tagsContainer}>
+                <FeedTags />
+            </View>
+            <ScrollView
+                contentContainerStyle={Platform.OS === "web" && { alignItems: "center" }}
+            >
+                <UserProfileFeed
+                    smallImgSource={smallImgSource}
+                    profileFeedImgSource={profileFeedImgSource}
+                    userName={user_name}
+                />
+                <UserProfileFeed
+                    smallImgSource={smallImgSource}
+                    profileFeedImgSource={profileFeedImgSource}
+                    userName={user_name}
+                />
+                <UserProfileFeed
+                    smallImgSource={smallImgSource}
+                    profileFeedImgSource={profileFeedImgSource}
+                    userName={user_name}
+                />
+            </ScrollView>
+        </>
+    );
+}
 
-//     const onSaveImageAsync = async () => {
-//         //blah blah
-//     };
+const styles = StyleSheet.create({
 
-//     return (
-//         <View style={styles.container}>
-//             <View style={styles.imgContainer}>
-//                 <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} altText="Background Image" />
-//                 {pickedEmoji &&
-//                     (
-//                         <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
-//                     )
-//                 } 
-//                 {/* this prevents undefined source for image */}
-//             </View>
-//             {showAppOptions ?
-//                 (
-//                     <View style={styles.optionsContainer}>
-//                         <View style={styles.optionsRow}>
-//                             <IconButton icon="refresh" label="Reset" onPress={onReset} />
-//                             <CircleButton onPress={onAddSticker} />
-//                             <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
-//                         </View>
-//                     </View>
-//                 ) : (
-//                     <View style={styles.footerContainer}>
-//                         <Button label="Choose a photo" theme="primary" onPress={pickImageAsync} />
-//                         <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
-//                     </View>
-//                 )}
-//             <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
-//                 <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
-//             </EmojiPicker>
-//         </View>
-//     );
-// }
+    tagsContainer: {
+        backgroundColor: "white",
+        paddingTop: 8,
+        paddingBottom: 8,
+        justifyContent: "space-between"
+    },
 
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         alignItems: "center",
-//         backgroundColor: "grey",
-//     },
-//     text: {
-//         textAlign: "center",
-//         color: "white",
-//     },
-//     imgContainer: {
-//         flex: 1,
-//         justifyContent: "center",
-//         backgroundColor: "grey",
-//     },
-//     footerContainer: {
-//         flex: 1 / 3,
-//     },
-//     optionsContainer: {
-//         position: 'absolute',
-//         bottom: 80, //push it up by 80 pixels
-//     },
-//     optionsRow: {
-//         alignItems: 'center',
-//         flexDirection: 'row',
-//     },
-// })
+    preferenceTagsButton: {
+        marginHorizontal: 5,
+        borderWidth: 2,
+        borderColor: "black",
+        borderRadius: 17,
+        alignItems: "center"
+    },
+
+    tags: {
+        padding: 5,
+        paddingHorizontal: 7,
+        fontSize: 15,
+        fontFamily: "Poppins_400Regular"
+    },
+
+})

@@ -2,14 +2,14 @@ import { useClerk } from '@clerk/clerk-expo'
 import * as Linking from 'expo-linking'
 import { Text, TouchableOpacity } from 'react-native'
 
-export const SignOutButton = () => {
+export const SignOutButton = ({style}) => {
   // Use `useClerk()` to access the `signOut()` function
   const { signOut } = useClerk()
   const handleSignOut = async () => {
     try {
       await signOut()
       // Redirect to your desired page
-      Linking.openURL(Linking.createURL('/signin'))
+      Linking.openURL(Linking.createURL('/login'))
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling
       // for more info on error handling
@@ -18,7 +18,7 @@ export const SignOutButton = () => {
   }
   return (
     <TouchableOpacity onPress={handleSignOut}>
-      <Text>Sign out</Text>
+      <Text style={{color: 'red'}}>Sign out</Text>
     </TouchableOpacity>
   )
 }

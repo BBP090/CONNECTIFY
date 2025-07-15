@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 //import { Colors, DarkColors, Colors } from "../constants/theme";
-import useThemeColors from '../hooks/useThemeColors';
+import useThemeColors from './hooks/useThemeColors';
 const Colors = useThemeColors();
 
 

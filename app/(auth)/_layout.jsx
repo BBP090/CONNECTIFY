@@ -5,8 +5,14 @@ export default function AuthRoutesLayout() {
   const { isSignedIn } = useAuth()
 
   if (isSignedIn) {
-    return <Redirect href={'/login'} />
+    return <Redirect href={'/'} />
   }
 
-  return <Stack />
+  return <Stack screenOptions={{
+    headerTitle:"Connectify",
+    headerTitleStyle:{
+      fontSize:25,
+      color: '#008000'
+    }
+  }}/>
 }

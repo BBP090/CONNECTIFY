@@ -6,7 +6,7 @@ export default function StartupScreen({ navigation }) {
     <View style={styles.container}>
       {/* App Logo */}
       <Image
-        source={require("../../assets/images/connectify_logo.png")}
+        source={require("../assets/images/connectify_logo.png")}
         style={styles.image}
         resizeMode="contain"
       />

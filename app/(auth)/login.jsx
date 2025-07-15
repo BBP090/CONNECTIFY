@@ -25,8 +25,8 @@ const LoginScreen = () => {
         console.error(JSON.stringify(signInAttempt, null, 2))
       }
     }
-    catch (error) {
-      console.error(JSON.stringify(error, null, 2))
+    catch (err) {
+      console.error(JSON.stringify(err, null, 2))
     }
   };
 
@@ -37,7 +37,7 @@ const LoginScreen = () => {
       <Text style={styles.title}>Hey,{"\n"}Welcome Back</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>Please login to continue</Text>
+      {/* <Text style={styles.subtitle}>Please login to continue</Text> */}
 
       {/* Email Input */}
       <View style={styles.inputContainer}>
@@ -53,14 +53,15 @@ const LoginScreen = () => {
 
       {/* Password Input */}
       <View style={styles.inputContainer}>
-        <Ionicons name="lock-closed-outline" size={20} color="#008000" style={styles.icon} />
+        {/* <Ionicons name="lock-closed-outline" size={20} color="#008000" style={styles.icon} /> */}
         <TextInput
           placeholder="Enter your password"
           style={styles.input}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-        />
+          onPress
+          /> 
       </View>
 
       {/* Forgot Password */}
@@ -114,19 +115,19 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderColor: '#ccc',
     borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 12,
     marginBottom: 20,
-    paddingHorizontal: 12,
     backgroundColor: '#f9f9f9',
   },
   icon: {
     marginRight: 10,
   },
   input: {
-    flex: 1,
+    flex:1,
     height: 48,
+    paddingHorizontal: 10,
   },
   forgotText: {
     color: 'gray',
