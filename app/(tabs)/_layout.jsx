@@ -4,9 +4,9 @@ import { TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const router = useRouter();
 
 export default function TabsLayout() {
+    const router = useRouter();
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
 
