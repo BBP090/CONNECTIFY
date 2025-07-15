@@ -11,15 +11,16 @@ export default function TabsLayout() {
             <SignedIn>
                 <Tabs
                     screenOptions={{
-                        tabBarActiveTintColor: "#1a1aff",
+                        tabBarActiveTintColor: "#008000",
+                        headerTitleStyle: {
+                            fontSize: 23,
+                            color: "#008000"
+                        },
                         headerStyle: {
                             backgroundColor: "white",
-                            // borderColor: "white",
                         },
                         headerShadowVisible: true,
-                        headerTintColor: "black",
                         tabBarStyle: {
-                            // marginTop: 10,
                             backgroundColor: "black",
                         }
                     }}>
