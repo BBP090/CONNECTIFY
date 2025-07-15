@@ -1,34 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSignIn } from '@clerk/clerk-expo'
+import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const LoginScreen = () => {
+  const { signIn, setActive, isLoaded } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // TODO: Add real authentication logic here
-    // If login successful, navigate to tabbed main app
-    router.replace('../../(tabs)');
+  const handleLogin = async () => {
+    if (!isLoaded) return;
+
+    try {
+      const signInAttempt = await signIn.create({
+        identifier: email,
+        password
+      });
+
+      if (signInAttempt.status === "complete") {
+        await setActive({ session: signInAttempt.createdSessionId });
+        router.replace('/');
+      } else {
+        console.error(JSON.stringify(signInAttempt, null, 2))
+      }
+    }
+    catch (error) {
+      console.error(JSON.stringify(error, null, 2))
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      {/* <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity> */}
 
       {/* Heading */}
-      <Text style={[styles.title, styles.bold]}>Hey,{"\n"}<Text style={styles.bold}>Welcome Back</Text></Text>
+      <Text style={styles.title}>Hey,{"\n"}Welcome Back</Text>
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>Please login to continue</Text>
 
       {/* Email Input */}
       <View style={styles.inputContainer}>
-        <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} />
+        {/* <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} /> */}
         <TextInput
           placeholder="Enter your email"
           style={styles.input}
@@ -51,7 +64,7 @@ const LoginScreen = () => {
       </View>
 
       {/* Forgot Password */}
-      <TouchableOpacity onPress={() => {}} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
+      <TouchableOpacity onPress={() => { }} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
@@ -87,7 +100,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '400',
+    fontWeight: '700',
     marginBottom: 10,
   },
   bold: {
