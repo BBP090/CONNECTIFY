@@ -10,11 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function FeedTags() {
-    const tags = [
-        "Music", "Sports", "Games", "Coding", "Tech",
-        "Art", "Photography", "Movies", "Fitness", "Travel",
-        "Books", "Fashion", "Food", "Nature", "Anime", "Design"];
-        
+    const tags = ["Music", "Sports", "Games", "Coding", "Tech", "Art", "Photography", "Movies", "Fitness", "Travel", "Books", "Fashion", "Food", "Nature", "Anime", "Design"];
     const [selectedTags, setSelectedTags] = useState([]);
     console.log(selectedTags);
 

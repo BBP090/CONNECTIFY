@@ -1,30 +1,94 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSignUp } from '@clerk/clerk-expo';
+import { Pressable, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const SignUpScreen = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const { signUp, isLoaded, setActive } = useSignUp();
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState('');
+  // const [name, setName] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
 
-const handleSignUp = () => {
-  // TODO: Replace with real signup logic
-  if (!name || !email || !password) {
-    Alert.alert('Error', 'Please fill in all fields');
-    return;
+  // handle submission of sign up form
+  const handleSignUp = async () => {
+    if (!emailAddress || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    // checks whether clerk resources are loaded or not if not return null
+    if (!isLoaded) return;
+
+    // start sign up process using email and password provided
+    try {
+      // create a user based on the inputs
+      // signUp.create() returns user/session state
+      await signUp.create({
+        emailAddress,
+        password
+      });
+
+      // send code in the email to verify the email
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      // start the verification process i.e, take user to the verification page, set pendingVerification true
+      setPendingVerification(true);
+    }
+    catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
+  };
+
+  // handle submission of verification form
+  const onVerifyPress = async () => {
+    if(!isLoaded) return;
+
+    try {
+      // attempt for verification with the code provided by the user against the code sent
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
+      // returns object with current signUp status, sessionid
+
+      // if the verification process is completed set user to active and redirect to another page
+      if (signUpAttempt.status === "complete") {
+        await setActive({ session: signUpAttempt.createdSessionId });
+        router.replace('/set_preferences');
+      }
+      else {
+        // if the status is not 'complete' then check why
+        console.error(JSON.stringify(error, null, 2));
+      }
+    }
+    catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
   }
 
-  // Simulate a successful signup
-  router.replace('/login'); // Use replace just like in login
-};
+  // when the user starts verification process display the following content
+  if (pendingVerification) {
+    return (
+      <View>
+        <Text>Verify Your Email</Text>
+        <TextInput
+          placeholder='Enter your code!'
+          value={code}
+          onChangeText={setCode}
+        />
+        <Pressable onPress={onVerifyPress}>
+          <Text>Verify</Text>
+        </Pressable>
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
+      {/* Back Button
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Heading */}
       <Text style={styles.title}>
@@ -35,7 +99,7 @@ const handleSignUp = () => {
       <Text style={styles.subtitle}>Please fill the details to create an account</Text>
 
       {/* Name Input */}
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <Ionicons name="person-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
           placeholder="Enter your name"
@@ -43,16 +107,17 @@ const handleSignUp = () => {
           value={name}
           onChangeText={setName}
         />
-      </View>
+      </View> */}
 
       {/* Email Input */}
       <View style={styles.inputContainer}>
         <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
+        autoCapitalize='none'
           placeholder="Enter your email"
           style={styles.input}
-          value={email}
-          onChangeText={setEmail}
+          value={emailAddress}
+          onChangeText={(email)=> setEmailAddress(email)}
           keyboardType="email-address"
         />
       </View>
@@ -61,11 +126,12 @@ const handleSignUp = () => {
       <View style={styles.inputContainer}>
         <Ionicons name="lock-closed-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
+        autoCapitalize='none'
           placeholder="Enter your password"
           style={styles.input}
           value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+          onChangeText={(password)=>setPassword(password)}
+          // secureTextEntry={true}
         />
       </View>
 

@@ -5,8 +5,12 @@ const ProfilePage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCircle}>
-        <Image  style={styles.profileImage} source={require("../../assets/images/pfp.png")}/>
-        <TouchableOpacity><Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text></TouchableOpacity>
+        <Image style={styles.profileImage} source={require("../../assets/images/pfp.png")} />
+        
+        {/* edit profile button */}
+        <TouchableOpacity>
+          <Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text>
+        </TouchableOpacity>
       </View>
       <Text style={styles.username}>Username</Text>
 
@@ -17,7 +21,7 @@ const ProfilePage = () => {
 
       <View style={styles.bioContainer}>
         <Text>
-            Bio here
+          Bio here
         </Text>
       </View>
 
@@ -48,7 +52,7 @@ const styles = StyleSheet.create({
   },
   profileCircle: {
     flexDirection: 'row',
-    alignItems:'center',
+    alignItems: 'center',
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -65,7 +69,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // or 'contain'
   },
   editProfile: {
-    marginHorizontal:10,
+    marginHorizontal: 10,
     fontSize: 16,
     color: '#333',
     marginVertical: 5,
