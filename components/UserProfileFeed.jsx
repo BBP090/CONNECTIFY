@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
 
     border: {
         padding: 10,
-        borderRadius: 10,
+        // borderRadius: 10,
     },
 
     userFeed1: {

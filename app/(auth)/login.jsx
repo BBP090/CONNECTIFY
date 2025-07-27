@@ -1,16 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-expo'
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { useSignIn, useUser, useAuth } from '@clerk/clerk-expo';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const LoginScreen = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { getToken } = useAuth()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { user } = useUser();
+
+  const API_URL = 'http://localhost:8000/api';
 
   const handleLogin = async () => {
-    if (!isLoaded) return;
+
+    console.log("login pressed");
 
     try {
       const signInAttempt = await signIn.create({
@@ -19,6 +24,7 @@ const LoginScreen = () => {
       });
 
       if (signInAttempt.status === "complete") {
+        console.log("sigin in successful");
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/');
       } else {
@@ -29,6 +35,42 @@ const LoginScreen = () => {
       console.error(JSON.stringify(err, null, 2))
     }
   };
+
+  useEffect(() => {
+    // console.log("Logged in:", loggedIn);          // ✅ CHECKPOINT 4
+    console.log("User from Clerk:", user);
+    const sendUser = async () => {
+      if (!user) return;
+      console.log("user is now available", user);
+
+      const token = await getToken();
+      const emailFromClerk = user.primaryEmailAddress?.emailAddress;
+      console.log("User email:", emailFromClerk);
+
+      try {
+        const res = await fetch(`${API_URL}/user/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            emailAddress: emailFromClerk,
+          }),
+        });
+
+        const data = await res.json();
+        console.log('Backend response:', data);
+      } catch (error) {
+        console.error('Fetch user failed:', error);
+      }
+    }
+
+    sendUser();
+  }, [user]);
+
+
+  if (!isLoaded) return <Text>Loading.....</Text>;
 
   return (
     <View style={styles.container}>
@@ -60,8 +102,7 @@ const LoginScreen = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          onPress
-          /> 
+        />
       </View>
 
       {/* Forgot Password */}
@@ -125,7 +166,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   input: {
-    flex:1,
+    flex: 1,
     height: 48,
     paddingHorizontal: 10,
   },

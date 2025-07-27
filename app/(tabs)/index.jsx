@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
 import UserProfileFeed from '../../components/UserProfileFeed';
 import FeedTags from '../../components/FeedTags';
+import {useUser} from '@clerk/clerk-expo';
 
 // const placeHolderImage = require("../../assets/image/background.png");
 const smallImgSource = require("../../assets/images/background.png");
@@ -13,17 +14,22 @@ const user_name = "Bishist Bikram Pant"
 
 export default function Home() {
 
-    const [data, setData] = useState(undefined);
+    // const [data, setData] = useState(undefined);
+    
+    // //   console.log(user.emailAddresses);
+    // console.log(user.emailAddresses[0].emailAddress);
+    // console.log(user);
 
-    const getAPI = async () => {
-        const file = "https://jsonplaceholder.typicode.com/posts/1";
-        let result = await fetch(file);
-        result = await result.json();
-        setData(result);
-        console.warn(result);
-    }
+    // // console.log("Hello", user.firstName);
+    // const getAPI = async () => {
+    //     const file = "https://jsonplaceholder.typicode.com/posts/1";
+    //     let result = await fetch(file);
+    //     result = await result.json();
+    //     setData(result);
+    //     console.warn(result);
+    // }
 
-    useEffect(() => { getAPI() }, [])
+    // useEffect(() => { getAPI() }, [])
 
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold,

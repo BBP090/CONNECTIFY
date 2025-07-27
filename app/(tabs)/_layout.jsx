@@ -1,7 +1,7 @@
 import { Stack, Tabs, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from 'react-native';
-import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo'
+import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
 
 const router = useRouter();
 
@@ -39,6 +39,7 @@ export default function TabsLayout() {
                         name="profile"
                         options={{
                             headerTitle: 'Profile',
+                            tabBarIcon: ({ focused, color }) => <MaterialIcons name={focused ? "person" : "person-outline"} color={color} size={20} />,
                             headerRight: () => (
                                 <TouchableOpacity
                                     onPress={() => router.push('/setting')}

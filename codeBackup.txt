@@ -282,3 +282,32 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+
+
+        const sendUser = async () => {
+
+          const emailFromClerk = user.primaryEmailAddress?.emailAddress;
+          console.log(emailFromClerk);
+
+          try {
+            const res = await fetch(`${API_URL}/user/signup`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                emailAddress: emailFromClerk
+              }),
+            });
+
+            const data = await res.json();
+            console.log("Backend response:", data);
+            router.replace('/');
+          } catch (error) {
+            console.error("Fetch user failed:", error);
+          }
+        };
+        sendUser();
+
