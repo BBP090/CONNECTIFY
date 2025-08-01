@@ -187,7 +187,8 @@ const MessageScreen = () => {
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Message Requests</Text>
       <FlatList
-        data={messageRequests.sort((a, b) => b.timestamp - a.timestamp)}
+        //data={messageRequests.sort((a, b) => b.timestamp - a.timestamp)}
+        data={messageRequests}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => renderMessageItem({ item, isRequest: true })}
         ListEmptyComponent={
@@ -197,7 +198,8 @@ const MessageScreen = () => {
 
       <Text style={styles.sectionTitle}>Ongoing Chats</Text>
       <FlatList
-        data={ongoingMessages.sort((a, b) => b.timestamp - a.timestamp)}
+        //data={ongoingMessages.sort((a, b) => b.timestamp - a.timestamp)}
+        data={ongoingMessages}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => renderMessageItem({ item, isRequest: false })}
         ListEmptyComponent={

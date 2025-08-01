@@ -171,7 +171,7 @@ app.get('/ongoing_messages/:userId', (req,res)=>{
   //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where ongoing_chats.user1_id= ? or ongoing_chats.user2_id= ?
 
   db.query(
-    `Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where ongoing_chats.user1_id= ? 
+    `Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where user1_id= ? OR user2_id= ?
 `,    [userId],
     (err, results)=>{
       if (err) return res.status(500).json({error: err.message});
