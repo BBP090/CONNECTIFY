@@ -46,6 +46,20 @@ io.on("connection", (socket) => {
       ]
     );
 
+
+await db.promise().query(
+  `UPDATE ongoing_chats SET last_message1=CASE WHEN user2_id=? THEN ? ELSE last_message1 END,last_message2=CASE WHEN user1_id=? THEN ? ELSE last_message2 END WHERE id=?
+`,
+  [
+    message.senderId,
+    message.messageType === "text" ? message.message : "Image.jpg",
+    message.senderId,
+    message.messageType === "text" ? message.message : "Image.jpg",
+    message.chatId,
+  ]
+);
+
+
     // ✅ Broadcast the message to everyone in the room, including sender
   io.to(message.chatId).emit("receiveMessage", {
     ...message,
@@ -175,8 +189,9 @@ app.get('/ongoing_messages/:userId', (req,res)=>{
   //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where user1_id= ? OR user2_id= ?
 
   db.query(
-    `SELECT ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message, users.id AS userId, users.name, users.profile_image AS image FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
-`,    [userId, userId],
+    `SELECT ongoing_chats.id AS id,ongoing_chats.started_at AS timestamp,CASE WHEN ongoing_chats.user1_id=? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id=? THEN ongoing_chats.last_message2 ELSE NULL END AS message,users.id AS userId,users.name,users.profile_image  FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
+
+`,    [userId, userId, userId, userId],
     (err, results)=>{
       if (err) return res.status(500).json({error: err.message});
       res.json(results);

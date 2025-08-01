@@ -21,6 +21,7 @@ import SimpleEmojiPicker from './hooks/SimpleEmojiPicker'; // Adjust path as nee
 
 
 
+
 import io from "socket.io-client";
 
 const socket = io("http://10.0.2.2:8000");  // Localhost for Android emulator
@@ -287,7 +288,7 @@ const handleSend = () => {
           <Text style={{ color: "white", fontWeight: "bold" }}>Send</Text>
         </Pressable>
       </View>
-      
+
 {showEmojiSelector && (
   <SimpleEmojiPicker
     onEmojiSelected={(emoji) => {

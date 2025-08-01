@@ -172,7 +172,7 @@ const MessageScreen = () => {
         isRequest ? handleRequestPress(item) : handleOngoingPress(item)
       }
     >
-      <Image source={{ uri: item.image }} style={styles.avatar} />
+      <Image source={{ require: item.image }} style={styles.avatar} />
       <View style={styles.messageTextContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text numberOfLines={1} style={styles.preview}>
