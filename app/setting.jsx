@@ -29,6 +29,8 @@ export default function SettingsScreen() {
     try {
       await signOut()
       // Redirect to your desired page
+       // ⚠️ Wait briefly to ensure session is cleared
+   
       Linking.openURL(Linking.createURL('/login'))
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling

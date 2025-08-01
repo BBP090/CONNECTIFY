@@ -12,6 +12,8 @@ const SignUpScreen = () => {
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
 
+  
+
   // handle submission of sign up form
   const handleSignUp = async () => {
     if (!emailAddress || !password) {
@@ -54,6 +56,16 @@ const SignUpScreen = () => {
       // if the verification process is completed set user to active and redirect to another page
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
+
+      // ✅ Send user email to backend MySQL
+      await fetch('http://10.0.2.2:8000/api/add-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: emailAddress }),
+      });
+      
         router.replace('/set_preferences');
       }
       else {

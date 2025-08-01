@@ -19,6 +19,17 @@ const LoginScreen = () => {
       });
 
       if (signInAttempt.status === "complete") {
+
+
+      // ✅ Send user email to backend MySQL
+      await fetch('http://10.0.2.2:8000/api/add-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email }),
+      });
+      
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/');
       } else {
@@ -60,7 +71,7 @@ const LoginScreen = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          onPress
+          
           /> 
       </View>
 
