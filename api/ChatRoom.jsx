@@ -14,8 +14,11 @@ import { Feather, Entypo } from "@expo/vector-icons";
 import EmojiSelector from "react-native-emoji-selector";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import GetUserID from "../hooks/GetUserID";
+
 
 const ChatMessagesScreen = () => {
+   const { userId: userId, loading: idLoading } = GetUserID();
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -23,7 +26,7 @@ const ChatMessagesScreen = () => {
   const scrollViewRef = useRef(null);
   const navigation = useNavigation();
   const route = useRoute();
-  const { chatId, userId = 1 } = route.params || {};
+  const { chatId = 1 } = route.params || {};
 
   useEffect(() => {
     if (chatId) {

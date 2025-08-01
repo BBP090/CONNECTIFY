@@ -80,6 +80,7 @@ const MessageScreen = () => {
   ]);
 */
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedOngoing, setSelectedOngoing]= useState(null);
   const [showModal, setShowModal] = useState(false);
 
  const formatTime = (date) => {
@@ -154,8 +155,12 @@ const MessageScreen = () => {
 
   };
 
-  const enterChatRoom = () => {
-    router.push("/ChatRoom");
+  const handleOngoingPress = (item) => {
+    console.log("Item on press:", item);
+    setSelectedOngoing(item)
+    //router.push("/ChatRoom");
+    router.push(`/${item.id}`); // ← missing backticks, brace, and closing quote
+
   };
 
  
@@ -164,7 +169,7 @@ const MessageScreen = () => {
     <Pressable
       style={styles.messageRow}
       onPress={() =>
-        isRequest ? handleRequestPress(item) : enterChatRoom()
+        isRequest ? handleRequestPress(item) : handleOngoingPress(item)
       }
     >
       <Image source={{ uri: item.image }} style={styles.avatar} />

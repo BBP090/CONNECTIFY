@@ -2,7 +2,16 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const db = require('./database');
 
+const http = require("http");
+const socketIo = require("socket.io");
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
 app.use(express.json());
 
 const port = 8000;
@@ -12,9 +21,52 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.listen(port, () => {
-  console.log("Server running on port 8000");
+
+// Listen for connection
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  // Join a specific chat room
+  socket.on("joinRoom", (chatId) => {
+    socket.join(chatId);
+  });
+
+  // Listen for messages and emit to room
+  socket.on("sendMessage", async (message) => {
+    // Save message to DB here:
+    await db.promise().query(
+      "INSERT INTO messages (chat_id, sender_id, message_type, message, image_url, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        message.chatId,
+        message.senderId,
+        message.messageType,
+        message.messageType === "text" ? message.message : null,
+        message.messageType === "image" ? message.imageUrl : null,
+        new Date(message.timeStamp),
+      ]
+    );
+
+    // ✅ Broadcast the message to everyone in the room, including sender
+  io.to(message.chatId).emit("receiveMessage", {
+    ...message,
+    timestamp: message.timeStamp,  // backend may overwrite this
+    sender_id: message.senderId,
+    message_type: message.messageType,
+    message: message.message,
+    image_url: message.imageUrl,
+  });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
+
+
+server.listen(port, () => {
+  console.log(` Server + Socket.IO running on http://localhost:${port}`);
+});
+
 
 app.post('/get-user-id', (req, res) => {
   const { email } = req.body;
@@ -113,8 +165,14 @@ app.get('/requests/:userId', (req, res) => {
 // geet ongoing chat history.
 app.get('/ongoing_messages/:userId', (req,res)=>{
   const userId= req.params.userId;
+// chalirako query
+  //SELECT ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message, users.id AS userId, users.name, users.profile_image AS image FROM ongoing_chats INNER JOIN users ON ongoing_chats.user2_id = users.id WHERE ongoing_chats.user2_id = ?
+
+  //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where ongoing_chats.user1_id= ? or ongoing_chats.user2_id= ?
+
   db.query(
-    `SELECT ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message, users.id AS userId, users.name, users.profile_image AS image FROM ongoing_chats INNER JOIN users ON ongoing_chats.user2_id = users.id WHERE ongoing_chats.user2_id = ?`,    [userId],
+    `Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where ongoing_chats.user1_id= ? 
+`,    [userId],
     (err, results)=>{
       if (err) return res.status(500).json({error: err.message});
       res.json(results);
