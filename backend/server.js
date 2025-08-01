@@ -25,13 +25,13 @@ const connection = mysql2.createConnection({
 const schema = `
 create table if not exists user2( 
   user_ID int primary key auto_increment, 
-  first_name varchar(255) null,
-  middle_name varchar(255) null,
-  last_name varchar(255) null,
-  DOB date null, 
-    gender int null,
-    district varchar(255) null,
-    city varchar(255) null,
+  first_name varchar(255),
+  middle_name varchar(255),
+  last_name varchar(255),
+  DOB date, 
+  gender int null,
+  district varchar(255) null,
+  city varchar(255) null,
     street_address varchar(255) null,
     date_created date null,
     email varchar(255) null,
@@ -58,7 +58,6 @@ create table if not exists connections(
     foreign key(request_receiver_ID) references user(user_ID) on delete cascade
 );
 `;
-
 
 app.use('/api/user', signUpRoute);
 

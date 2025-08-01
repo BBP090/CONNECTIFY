@@ -1,23 +1,24 @@
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
+
 const router = useRouter();
 const ProfilePage = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileCircle}>
-        <Image style={styles.profileImage} source={require("../../assets/images/pfp.png")} />
+        <Image style={styles.profileImage} source={require("../assets/images/pfp.png")} />
         
         {/* edit profile button */}
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <Text style={styles.username}>Username</Text>
 
-      {/* <TouchableOpacity style={styles.connectButton}> */}
-        {/* <Text style={styles.connectText}>Connect</Text> */}
+      <TouchableOpacity style={styles.connectButton}>
+        <Text style={styles.connectText}>Connect</Text>
         {/* <View style={styles.greenDot} /> */}
-      {/* </TouchableOpacity> */}
+      </TouchableOpacity>
 
       <View style={styles.bioContainer}>
         <Text>
@@ -31,13 +32,13 @@ const ProfilePage = () => {
 
       <View style={styles.photoGrid}>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji1.png")} />
+          <Image style={styles.photos} source={require("../assets/images/emoji1.png")} />
         </View>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji2.png")} />
+          <Image style={styles.photos} source={require("../assets/images/emoji2.png")} />
         </View>
         <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji3.png")} />
+          <Image style={styles.photos} source={require("../assets/images/emoji3.png")} />
         </View>
       </View>
     </ScrollView>

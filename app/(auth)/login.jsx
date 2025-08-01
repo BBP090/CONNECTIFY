@@ -1,17 +1,14 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { useSignIn, useUser, useAuth } from '@clerk/clerk-expo';
+import { useState } from 'react';
+import { useSignIn } from '@clerk/clerk-expo';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const LoginScreen = () => {
+export default function LoginScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
-  const { getToken } = useAuth()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user } = useUser();
-
-  const API_URL = 'http://localhost:8000/api';
+  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async () => {
 
@@ -28,47 +25,19 @@ const LoginScreen = () => {
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/');
       } else {
-        console.error(JSON.stringify(signInAttempt, null, 2))
+        console.error(JSON.stringify(signInAttempt, null, 2));
       }
     }
     catch (err) {
       console.error(JSON.stringify(err, null, 2))
+      if (err.errors[0].code === 'form_password_incorrect' || err.errors[0].code === 'form_identifier_not_found') {
+        setError(true);
+        setErrorMsg('Your credentials do not match!!');
+      }
+
+      console.log(err.errors[0].code);
     }
   };
-
-  useEffect(() => {
-    // console.log("Logged in:", loggedIn);          // ✅ CHECKPOINT 4
-    console.log("User from Clerk:", user);
-    const sendUser = async () => {
-      if (!user) return;
-      console.log("user is now available", user);
-
-      const token = await getToken();
-      const emailFromClerk = user.primaryEmailAddress?.emailAddress;
-      console.log("User email:", emailFromClerk);
-
-      try {
-        const res = await fetch(`${API_URL}/user/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            emailAddress: emailFromClerk,
-          }),
-        });
-
-        const data = await res.json();
-        console.log('Backend response:', data);
-      } catch (error) {
-        console.error('Fetch user failed:', error);
-      }
-    }
-
-    sendUser();
-  }, [user]);
-
 
   if (!isLoaded) return <Text>Loading.....</Text>;
 
@@ -91,6 +60,10 @@ const LoginScreen = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
         />
+        {/* { {if(emailError){
+          return <Text>Email Not Found</Text>
+        }
+        }} */}
       </View>
 
       {/* Password Input */}
@@ -126,7 +99,7 @@ const LoginScreen = () => {
   );
 };
 
-export default LoginScreen;
+// export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
