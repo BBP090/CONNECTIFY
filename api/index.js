@@ -96,15 +96,27 @@ app.post("/requests/send", (req, res) => {
   });
 });
 
-
 // GET message requests
 app.get('/requests/:userId', (req, res) => {
   const userId = req.params.userId;
   db.query(
-    'SELECT * FROM message_requests WHERE to_user_id = ?',
+
+    'select message_requests.id AS id, message_requests.message, message_requests.timestamp, users.id AS userId, users.name, users.profile_image from message_requests inner join users on message_requests.to_user_id= users.id where message_requests.to_user_id= ?',
     [userId],
     (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
+      res.json(results);
+    }
+  );
+});
+
+// geet ongoing chat history.
+app.get('/ongoing_messages/:userId', (req,res)=>{
+  const userId= req.params.userId;
+  db.query(
+    `SELECT ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message, users.id AS userId, users.name, users.profile_image AS image FROM ongoing_chats INNER JOIN users ON ongoing_chats.user2_id = users.id WHERE ongoing_chats.user2_id = ?`,    [userId],
+    (err, results)=>{
+      if (err) return res.status(500).json({error: err.message});
       res.json(results);
     }
   );
