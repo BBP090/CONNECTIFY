@@ -170,8 +170,12 @@ app.get('/ongoing_messages/:userId', (req,res)=>{
 
   //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where ongoing_chats.user1_id= ? or ongoing_chats.user2_id= ?
 
+  //
+
+  //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where user1_id= ? OR user2_id= ?
+
   db.query(
-    `Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where user1_id= ? OR user2_id= ?
+    `SELECT ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message, users.id AS userId, users.name, users.profile_image AS image FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
 `,    [userId, userId],
     (err, results)=>{
       if (err) return res.status(500).json({error: err.message});

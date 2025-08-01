@@ -17,6 +17,8 @@ import GetUserID from "./hooks/GetUserID";
 import { useLocalSearchParams } from "expo-router";
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import SimpleEmojiPicker from './hooks/SimpleEmojiPicker'; // Adjust path as needed
+
 
 
 import io from "socket.io-client";
@@ -248,6 +250,7 @@ const handleSend = () => {
 
         <TextInput
           value={message}
+          
           onChangeText={(text) => setMessage(text)}
           style={{
             flex: 1,
@@ -284,15 +287,15 @@ const handleSend = () => {
           <Text style={{ color: "white", fontWeight: "bold" }}>Send</Text>
         </Pressable>
       </View>
+      
+{showEmojiSelector && (
+  <SimpleEmojiPicker
+    onEmojiSelected={(emoji) => {
+      setMessage((prev) => prev + emoji);
+    }}
+  />
+)}
 
-      {showEmojiSelector && (
-        <EmojiSelector
-          onEmojiSelected={(emoji) => {
-            setMessage((prev) => prev + emoji);
-          }}
-          style={{ height: 250 }}
-        />
-      )}
     </KeyboardAvoidingView>
   );
 };
