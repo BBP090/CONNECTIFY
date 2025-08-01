@@ -7,11 +7,15 @@ import {
   Image,
   Modal,
   TouchableOpacity,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard
 } from "react-native";
 import React, { useEffect ,useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import GetUserID from "../hooks/GetUserID";
+import Fuse from 'fuse.js';
 
 
 const MessageScreen = () => {
@@ -19,8 +23,18 @@ const MessageScreen = () => {
   const { userId: userId, loading: idLoading } = GetUserID();
   const [messageRequests, setMessageRequests] = useState([]);
   const [ongoingMessages, setOngoingMessages]=useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const router= useRouter();
+
+  const fuse = new Fuse(ongoingMessages ?? [], {
+  keys: ['name'],
+  threshold: 0.3,  // Lower = more exact matches, higher = more fuzzy
+  ignoreLocation: true,
+  minMatchCharLength: 1,
+});
+
 
   // Fetch all message requests and filter out self
     useEffect(() => {
@@ -82,6 +96,28 @@ const MessageScreen = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedOngoing, setSelectedOngoing]= useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  // Filter ongoingMessages based on searchText (case-insensitive)
+  /*
+  const filteredOngoing = 
+  Array.isArray(ongoingMessages)
+    ? ongoingMessages.filter(item =>
+        item.name.toLowerCase().includes(searchText.toLowerCase())
+      )
+    : [];*/
+
+    const filteredOngoing = searchText.trim() === ''
+  ? ongoingMessages ?? []
+  : fuse.search(searchText).map(result => result.item);
+
+
+  // Handle selecting a suggestion from autosuggest list
+  const handleSuggestionPress = (item) => {
+    setSearchText("");  // clear search bar
+    setShowSuggestions(false);
+    router.push(`/${item.id}`);
+  };
+
 
  const formatTime = (date) => {
   const d = new Date(date);
@@ -184,6 +220,47 @@ const MessageScreen = () => {
   );
 
   return (
+
+    <TouchableWithoutFeedback onPress={() => {
+      Keyboard.dismiss();
+      setShowSuggestions(false);
+    }}>
+      <View style={styles.container}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search ongoing chats"
+            value={searchText}
+            onChangeText={(text) => {
+              setSearchText(text);
+              setShowSuggestions(text.length > 0);
+            }}
+            autoCorrect={false}
+            autoCapitalize="none"
+            clearButtonMode="while-editing"
+          />
+        </View>
+
+        {/* Autosuggest List */}
+        {showSuggestions && filteredOngoing.length > 0 && (
+          <View style={styles.suggestionBox}>
+            <FlatList
+              keyboardShouldPersistTaps="handled"
+              data={filteredOngoing}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.suggestionItem}
+                  onPress={() => handleSuggestionPress(item)}
+                >
+                  <Text style={styles.suggestionText}>{item.name}</Text>
+                </Pressable>
+              )}
+            />
+          </View>
+        )}
+
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Message Requests</Text>
       <FlatList
@@ -225,6 +302,8 @@ const MessageScreen = () => {
         </View>
       </Modal>
     </View>
+    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -315,4 +394,49 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
   },
+  searchContainer: {
+  paddingHorizontal: 15,
+  marginBottom: 8,
+  marginTop: 10,
+},
+searchInput: {
+  backgroundColor: "#fff",
+  paddingVertical: 10,
+  paddingHorizontal: 15,
+  borderRadius: 25,
+  fontSize: 16,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 5,
+  elevation: 3,
+},
+suggestionBox: {
+  backgroundColor: "#fff",
+  maxHeight: 150,
+  marginHorizontal: 15,
+  borderRadius: 10,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.12,
+  shadowRadius: 8,
+  elevation: 4,
+  marginBottom: 10,
+  zIndex: 999,
+  position: "absolute",
+  top: 70, // below search bar (adjust if needed)
+  left: 0,
+  right: 0,
+},
+suggestionItem: {
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderBottomColor: "#eee",
+  borderBottomWidth: 1,
+},
+suggestionText: {
+  fontSize: 16,
+  color: "#333",
+},
+
 });

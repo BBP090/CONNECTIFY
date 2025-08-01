@@ -40,6 +40,7 @@
     "expo-updates": "~0.28.15",
     "expo-web-browser": "~14.2.0",
     "express": "^5.1.0",
+    "fuse.js": "^7.1.0",
     "mysql2": "^3.14.1",
     "nodemon": "^3.1.10",
     "react": "19.0.0",
