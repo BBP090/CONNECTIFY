@@ -311,7 +311,8 @@ useEffect(() => {
       <Image source={{ require: item.image }} style={styles.avatar} />
       <View style={styles.messageTextContainer}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text numberOfLines={1} style={!readMessages[item.id] ? styles.boldPreview : styles.preview}>
+    {/*   <Text numberOfLines={1} style={!readMessages[item.id] ? styles.boldPreview : styles.preview}> */}
+        <Text numberOfLines={1} style={ styles.preview}>
           {item.message}
         </Text>
       </View>

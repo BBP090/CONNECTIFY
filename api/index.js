@@ -41,7 +41,7 @@ io.on("connection", (socket) => {
   // Listen for messages and emit to room
   socket.on("sendMessage", async (message) => {
     // Save message to DB here:
-    await db.promise().query(
+    const [result]= await db.promise().query(
       "INSERT INTO messages (chat_id, sender_id, message_type, message, image_url, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
       [
         message.chatId,
@@ -53,15 +53,19 @@ io.on("connection", (socket) => {
       ]
     );
 
+      const insertedMessageId = result.insertId;  // <-- This is the new message's ID
+
 
 await db.promise().query(
   `UPDATE ongoing_chats SET last_message1=CASE WHEN user2_id=? THEN ? ELSE last_message1 END,last_message2=CASE WHEN user1_id=? THEN ? ELSE last_message2 END WHERE id=?
 `,
   [
     message.senderId,
-    message.messageType === "text" ? message.message : "Image.jpg",
+    //message.messageType === "text" ? message.message : "Image.jpg",
+    insertedMessageId,
     message.senderId,
-    message.messageType === "text" ? message.message : "Image.jpg",
+    insertedMessageId,
+   // message.messageType === "text" ? message.message : "Image.jpg",
     message.chatId,
   ]
 );
@@ -205,8 +209,13 @@ app.get('/ongoing_messages/:userId', (req,res)=>{
 
   //Select ongoing_chats.id AS id, ongoing_chats.started_at as timestamp ,ongoing_chats.last_message as message from ongoing_chats where user1_id= ? OR user2_id= ?
 
+  //SELECT ongoing_chats.id AS id, messages.message AS message, messages.timestamp AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id = ongoing_chats.user1_id AND ongoing_chats.user2_id = ?) OR (users.id = ongoing_chats.user2_id AND ongoing_chats.user1_id = ?) LEFT JOIN messages ON messages.id = CASE WHEN ongoing_chats.user1_id = ? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id = ? THEN ongoing_chats.last_message2 ELSE NULL END
+
+
+  //SELECT ongoing_chats.id AS id,ongoing_chats.started_at AS timestamp,CASE WHEN ongoing_chats.user1_id=? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id=? THEN ongoing_chats.last_message2 ELSE NULL END AS message,users.id AS userId,users.name,users.profile_image  FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
+
   db.query(
-    `SELECT ongoing_chats.id AS id,ongoing_chats.started_at AS timestamp,CASE WHEN ongoing_chats.user1_id=? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id=? THEN ongoing_chats.last_message2 ELSE NULL END AS message,users.id AS userId,users.name,users.profile_image  FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
+    `SELECT ongoing_chats.id AS id, messages.message AS message, messages.timestamp AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id = ongoing_chats.user1_id AND ongoing_chats.user2_id = ?) OR (users.id = ongoing_chats.user2_id AND ongoing_chats.user1_id = ?) LEFT JOIN messages ON messages.id = CASE WHEN ongoing_chats.user1_id = ? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id = ? THEN ongoing_chats.last_message2 ELSE NULL END
 
 `,    [userId, userId, userId, userId],
     (err, results)=>{

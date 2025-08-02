@@ -14,6 +14,8 @@ import { router } from 'expo-router';
 import { SignOutButton } from "../components/SignOutButton";
 import { useClerk } from '@clerk/clerk-expo'
 import * as Linking from 'expo-linking'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function SettingsScreen() {
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -27,6 +29,8 @@ export default function SettingsScreen() {
 
   const handleSignOut = async () => {
     try {
+       // Clear AsyncStorage first
+      await AsyncStorage.clear();
       await signOut()
       // Redirect to your desired page
        // ⚠️ Wait briefly to ensure session is cleared

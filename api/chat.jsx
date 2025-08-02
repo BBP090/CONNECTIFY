@@ -170,3 +170,22 @@ export default MessageScreen;
 const styles = StyleSheet.create({
   // keep your original styles here
 });
+dadfad
+for id=1,
+
+SELECT 
+  ongoing_chats.id AS id,
+when ongoing_chats.user1_id= ? then ongoing_chats.last_message1, then messages.timestamp as timestamp, where messages.message=ongoing_chats.last_message1
+WHEN ongoing_chats.user2_id = ? THEN ongoing_chats.last_message2, then messages.timestamp as timestamp, where messages.message= ongoing_chats.last_message1
+else null
+ END AS message,
+  users.id AS userId,
+  users.name,
+  users.profile_image
+FROM ongoing_chats
+
+-- Join with users table to get the "other user"
+INNER JOIN users 
+  ON (users.id = ongoing_chats.user1_id AND ongoing_chats.user2_id = ?)
+  OR (users.id = ongoing_chats.user2_id AND ongoing_chats.user1_id = ?)
+inner join messages on messages.message= ongoing_chats.last_message1 or ongoing_chats.last_message2
