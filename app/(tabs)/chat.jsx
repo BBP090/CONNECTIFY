@@ -17,6 +17,8 @@ import {
 } from "react-native";
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
 import useGetUserID from "../hooks/useGetUserID";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+ 
 
 import io from "socket.io-client";
 
@@ -30,6 +32,7 @@ const MessageScreen = () => {
   const [searchText, setSearchText] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [readMessages, setReadMessages]= useState({});
   const router= useRouter();
 
   const fuse = new Fuse(ongoingMessages ?? [], {
@@ -38,6 +41,8 @@ const MessageScreen = () => {
   ignoreLocation: true,
   minMatchCharLength: 1,
 });
+
+
 
 
   // Fetch all message requests and filter out self
@@ -55,7 +60,56 @@ const MessageScreen = () => {
         .finally(() => setLoading(false));
     }, [userId]);
 
+    useEffect(() => {
+  if (!userId) return;
+
+  // Load cached ongoing messages from AsyncStorage immediately
+  const loadCachedMessages = async () => {
+    try {
+      const cached = await AsyncStorage.getItem('ongoingMessages');
+      if (cached) {
+        setOngoingMessages(JSON.parse(cached));
+      }
+    } catch (e) {
+      console.error('Failed to load cached messages', e);
+    }
+  };
+
+  loadCachedMessages();
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE_URL}/ongoing_messages/${userId}`);
+      const data = await res.json();
+      setOngoingMessages(data);
+      await AsyncStorage.setItem('ongoingMessages', JSON.stringify(data));  // Cache fresh data
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMessages();
+  socket.emit("receiveTexts", userId);
+
+  socket.on("chat_updated", (userId) => {
+    if (!userId) return;
+    fetchMessages();
+  });
+
+  return () => {
+    socket.off("chat_updated");
+  };
+}, [userId]);
+
+
+    ///new ajasjdhjashdasdhashdksahdjhajsdhajs
+    ///asdjasdajdshjkahdhsajd
     // fetch thy texts
+//from heere 
+    /*
       useEffect(() => {
   if (!userId) return;
 
@@ -80,6 +134,33 @@ const MessageScreen = () => {
     socket.off("chat_updated");
   };
 }, [userId]);
+*/
+//to here
+
+
+// to figure out the bold from  from asyncstorage
+const [readMessagesLoaded, setReadMessagesLoaded] = useState(false);
+
+useEffect(() => {
+  const loadReadMessages = async () => {
+    const stored = await AsyncStorage.getItem('readMessages');
+    if (stored) setReadMessages(JSON.parse(stored));
+    setReadMessagesLoaded(true);
+  };
+  loadReadMessages();
+}, []);
+
+
+
+// for tracking read messages
+ useEffect(() => {
+  const timeout = setTimeout(() => {
+    AsyncStorage.setItem('readMessages', JSON.stringify(readMessages));
+  }, 500);
+
+  return () => clearTimeout(timeout);
+}, [readMessages]);
+
 
 
     /*
@@ -144,6 +225,7 @@ const MessageScreen = () => {
 
   const handleRequestPress = (item) => {
     console.log("Item on press:", item);
+  setReadMessages((prev) => ({ ...prev, [item.id]: true }));
 
     setSelectedRequest(item);
     setShowModal(true);
@@ -209,6 +291,7 @@ const MessageScreen = () => {
   };
 
   const handleOngoingPress = (item) => {
+    setReadMessages((prev) => ({ ...prev, [item.id]: true }));
     console.log("Item on press:", item);
     setSelectedOngoing(item)
     //router.push("/ChatRoom");
@@ -228,7 +311,7 @@ const MessageScreen = () => {
       <Image source={{ require: item.image }} style={styles.avatar} />
       <View style={styles.messageTextContainer}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text numberOfLines={1} style={styles.preview}>
+        <Text numberOfLines={1} style={!readMessages[item.id] ? styles.boldPreview : styles.preview}>
           {item.message}
         </Text>
       </View>
@@ -363,6 +446,11 @@ const styles = StyleSheet.create({
   preview: {
     fontSize: 14,
     color: "#666",
+  },
+  boldPreview: {
+    fontSize: 14,
+    color: 'black',
+    fontWeight: 'bold',
   },
   timestamp: {
     fontSize: 12,
