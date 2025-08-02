@@ -18,7 +18,9 @@ import {
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
 import useGetUserID from "../hooks/useGetUserID";
 import AsyncStorage from '@react-native-async-storage/async-storage';
- 
+import { useFocusEffect } from '@react-navigation/native'; 
+import { useCallback } from 'react';
+
 
 import io from "socket.io-client";
 
@@ -46,7 +48,8 @@ const MessageScreen = () => {
 
 
   // Fetch all message requests and filter out self
-    useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
       if (!userId) return;
   
       setLoading(true);
@@ -58,7 +61,8 @@ const MessageScreen = () => {
         })
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
-    }, [userId]);
+    }, [userId])
+  );
 
     useEffect(() => {
   if (!userId) return;
