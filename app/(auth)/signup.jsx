@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useSignUp } from '@clerk/clerk-expo';
 import { Pressable, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
+
 
 export default function SignUpScreen() {
   const { signUp, isLoaded, setActive } = useSignUp();
@@ -73,6 +75,16 @@ export default function SignUpScreen() {
       // if the verification process is completed set user to active and redirect to another page
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
+
+      // ✅ Send user email to backend MySQL
+      await fetch(`${BASE_URL}/api/add-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: emailAddress }),
+      });
+      
         router.replace('/set_preferences');
       }
       else {

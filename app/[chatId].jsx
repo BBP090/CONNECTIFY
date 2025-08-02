@@ -1,27 +1,104 @@
+import { Entypo, Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { useEffect, useRef, useState } from "react";
 import {
+  Image,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
-  ScrollView,
-  KeyboardAvoidingView,
   TextInput,
-  Pressable,
-  Image,
+  View,
 } from "react-native";
-import React, { useState, useRef } from "react";
-import { Feather, Ionicons, FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
-import EmojiSelector from "react-native-emoji-selector";
-import * as ImagePicker from "expo-image-picker";
-import { useNavigation } from "@react-navigation/native";
+
+import { useLocalSearchParams } from "expo-router";
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+import SimpleEmojiPicker from './hooks/SimpleEmojiPicker'; // Adjust path as needed
+import useGetUserID from "./hooks/useGetUserID";
+
+
+
+
+
+import io from "socket.io-client";
+import { BASE_URL } from "../config/config"; // adjust the path as needed
+const socket = io(`${BASE_URL}`);  // Localhost for Android emulator
+
 
 const ChatMessagesScreen = () => {
+  const { chatId } = useLocalSearchParams();
+  const [receiverId, setReceiverId]= useState(null);
+  const [chat, setChat]= useState(null);
+  const { userId: userId, loading: idLoading } = useGetUserID();
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
+    const [loading, setLoading] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const navigation = useNavigation();
   const scrollViewRef = useRef(null);
 
+
+
+// custom user effect to retrieve the message recipient's id.
+useEffect(()=>{
+  if (!chatId) return;
+  setLoading(true);
+  fetch(`${BASE_URL}/chat/${chatId}/recipientId`)
+          .then((res) => res.json())
+          .then((data) => {
+            
+            setChat(data);
+          })
+          .catch((err) => console.error(err))
+          .finally(() => setLoading(false));
+
+}, [chatId]);
+
+useEffect(()=>{
+  if (!chat) return;
+
+  const id= chat.user1_id === userId ? chat.user2_id : chat.user1_id;
+  setReceiverId(id);
+}, [chat, userId]);
+
+
+    // Fetch all message requests and filter out self
+      useEffect(() => {
+        if (!userId) return;
+    
+        setLoading(true);
+        fetch(`${BASE_URL}/chat/${chatId}/messages`)
+          .then((res) => res.json())
+          .then((data) => {
+            
+            setMessages(data);
+          })
+          .catch((err) => console.error(err))
+          .finally(() => setLoading(false));
+      }, [userId]);
+
+      useEffect(() => {
+  if (!chatId || !userId) return;
+
+  socket.emit("joinRoom", chatId);
+
+  socket.on("receiveMessage", (newMessage) => {
+    setMessages((prev) => [...prev, newMessage]);
+     setTimeout(() => scrollToBottom(), 100); // Ensures auto-scroll after render
+  });
+
+  return () => {
+    socket.off("receiveMessage");
+  };
+}, [chatId, userId]);
+
+//const receiverId = chat.user1_id === userId ? chat.user2_id : chat.user1_id;
+
+////////
   const scrollToBottom = () => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: false });
@@ -41,41 +118,53 @@ const ChatMessagesScreen = () => {
     return new Date(time).toLocaleString("en-US", options);
   };
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+//const receiverId = chat.user1_id === userId ? chat.user2_id : chat.user1_id;
+// id: result 
 
-    if (!result.canceled) {
-      const newImageMessage = {
-        _id: Date.now().toString(),
-        messageType: "image",
-        imageUrl: result.uri,
-        timeStamp: new Date(),
-        senderId: "self",
-      };
-      setMessages((prev) => [...prev, newImageMessage]);
-    }
-  };
+const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.All,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-
-    const newMessage = {
-      _id: Date.now().toString(),
-      messageType: "text",
-      message: message,
+  if (!result.canceled) {
+    const newImageMessage = {
+      _id: uuidv4(),
+      messageType: "image",
+      imageUrl: result.uri,
       timeStamp: new Date(),
-      senderId: "self",
+      senderId: userId,
+      chatId: chatId,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
-    setMessage("");
-    scrollToBottom();
+    socket.emit("sendMessage", newImageMessage);
+    setMessages((prev) => [...prev, newImageMessage]);
+  }
+};
+
+
+
+const handleSend = () => {
+  if (!message.trim()) return;
+
+  const newMessage = {
+    _id: uuidv4(),
+    messageType: "text",
+    message: message,
+    timeStamp: new Date(),
+    senderId: userId,
+    chatId: chatId,
+    receiverId
   };
+
+  socket.emit("sendMessage", newMessage);
+  //setMessages((prev) => [...prev, newMessage]);
+  setMessage("");
+  scrollToBottom();
+};
+
 
   const handleSelectMessage = (msg) => {
     const isSelected = selectedMessages.includes(msg._id);
@@ -95,9 +184,9 @@ const ChatMessagesScreen = () => {
       >
         {messages.map((item, index) => {
           const isSelected = selectedMessages.includes(item._id);
-          const isSelf = item.senderId === "self";
+          const isSelf = item.sender_id === userId;
 
-          if (item.messageType === "text") {
+          if (item.message_type === "text") {
             return (
               <Pressable
                 key={index}
@@ -130,13 +219,13 @@ const ChatMessagesScreen = () => {
                     marginTop: 5,
                   }}
                 >
-                  {formatTime(item.timeStamp)}
+                  {formatTime(item.timestamp)}
                 </Text>
               </Pressable>
             );
           }
 
-          if (item.messageType === "image") {
+          if (item.message_type === "image") {
             return (
               <Pressable
                 key={index}
@@ -150,7 +239,7 @@ const ChatMessagesScreen = () => {
                 }}
               >
                 <Image
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.image_url }}
                   style={{ width: 200, height: 200, borderRadius: 7 }}
                 />
                 <Text
@@ -164,7 +253,7 @@ const ChatMessagesScreen = () => {
                     marginTop: 5,
                   }}
                 >
-                  {formatTime(item.timeStamp)}
+                  {formatTime(item.timestamp)}
                 </Text>
               </Pressable>
             );
@@ -193,6 +282,7 @@ const ChatMessagesScreen = () => {
 
         <TextInput
           value={message}
+          
           onChangeText={(text) => setMessage(text)}
           style={{
             flex: 1,
@@ -230,14 +320,14 @@ const ChatMessagesScreen = () => {
         </Pressable>
       </View>
 
-      {showEmojiSelector && (
-        <EmojiSelector
-          onEmojiSelected={(emoji) => {
-            setMessage((prev) => prev + emoji);
-          }}
-          style={{ height: 250 }}
-        />
-      )}
+{showEmojiSelector && (
+  <SimpleEmojiPicker
+    onEmojiSelected={(emoji) => {
+      setMessage((prev) => prev + emoji);
+    }}
+  />
+)}
+
     </KeyboardAvoidingView>
   );
 };

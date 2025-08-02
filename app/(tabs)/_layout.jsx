@@ -3,9 +3,9 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
 
-const router = useRouter();
 
 export default function TabsLayout() {
+    const router = useRouter();
     return (
         <>
             <SignedIn>

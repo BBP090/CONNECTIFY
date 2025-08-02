@@ -2,6 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-expo';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
+
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -33,6 +35,17 @@ export default function LoginScreen() {
 
       if (signInAttempt.status === "complete") {
         console.log("signin in successful");
+
+
+      // ✅ Send user email to backend MySQL
+      await fetch(`${BASE_URL}/api/add-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email }),
+      });
+      
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace('/');
       } else {
