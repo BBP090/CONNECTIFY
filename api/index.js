@@ -31,6 +31,13 @@ io.on("connection", (socket) => {
     socket.join(chatId);
   });
 
+
+  // to update a specific user's request page:
+   socket.on("receiveTexts", (userId) => {
+    socket.join(userId);
+  });
+
+
   // Listen for messages and emit to room
   socket.on("sendMessage", async (message) => {
     // Save message to DB here:
@@ -69,7 +76,17 @@ await db.promise().query(
     message: message.message,
     image_url: message.imageUrl,
   });
+
+
+
+  io.to(message.senderId).emit("chat_updated", { userId: message.senderId });
+  io.to(message.receiverId).emit("chat_updated", {
+    userId: message.receiverId
   });
+
+  });
+
+  
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
@@ -256,6 +273,18 @@ app.post('/chat/:chatId/message', (req, res) => {
     (err) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
+    }
+  );
+});
+
+app.get('/chat/:chatId/recipientId', (req, res)=>{
+  const chatId = req.params.chatId;
+
+  db.query(
+    'select * from ongoing_chats where id= ?', [chatId], (err, results)=>{
+      if (err) return res.status(500).json({error: err.message});
+      if (results.length=== 0) return res.status(404).json({ error: 'Chat not found' });
+      res.json(results[0]);
     }
   );
 });

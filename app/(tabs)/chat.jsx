@@ -1,26 +1,30 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-  Image,
-  Modal,
-  TouchableOpacity,
-  TextInput,
-  TouchableWithoutFeedback,
-  Keyboard
-} from "react-native";
-import React, { useEffect ,useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import GetUserID from "../hooks/GetUserID";
 import Fuse from 'fuse.js';
+import { useEffect, useState } from "react";
+import {
+  FlatList,
+  Image,
+  Keyboard,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from "react-native";
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
+import useGetUserID from "../hooks/useGetUserID";
 
+import io from "socket.io-client";
+
+const socket = io(`${BASE_URL}`);  // Localhost for Android emulator
 
 const MessageScreen = () => {
   const navigation = useNavigation();
-  const { userId: userId, loading: idLoading } = GetUserID();
+  const { userId: userId, loading: idLoading } = useGetUserID();
   const [messageRequests, setMessageRequests] = useState([]);
   const [ongoingMessages, setOngoingMessages]=useState([]);
   const [searchText, setSearchText] = useState("");
@@ -41,7 +45,7 @@ const MessageScreen = () => {
       if (!userId) return;
   
       setLoading(true);
-      fetch(`http://10.0.2.2:8000/requests/${userId}`)
+      fetch(`${BASE_URL}/requests/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           
@@ -51,19 +55,32 @@ const MessageScreen = () => {
         .finally(() => setLoading(false));
     }, [userId]);
 
-    // Fetch all ongoing messages.
-    useEffect(()=>{
-      if (!userId) return;
-      
-      setLoading(true);
-      fetch(`http://10.0.2.2:8000/ongoing_messages/${userId}`)
-        .then((res)=>res.json())
-        .then((data) => {
-          setOngoingMessages(data);
-        })
-        .catch((err)=>console.error(err))
-        .finally(()=> setLoading(false));
-    }, [userId])
+    // fetch thy texts
+      useEffect(() => {
+  if (!userId) return;
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    await fetch(`${BASE_URL}/ongoing_messages/${userId}`)
+      .then(res => res.json())
+      .then(data => {setOngoingMessages(data)})
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  fetchMessages();
+  socket.emit("receiveTexts", userId);
+
+  socket.on("chat_updated", (userId) => {
+    if (!userId) return;
+    fetchMessages();
+  });
+
+  return () => {
+    socket.off("chat_updated");
+  };
+}, [userId]);
+
 
     /*
   const [messageRequests, setMessageRequests] = useState([
@@ -146,7 +163,7 @@ const MessageScreen = () => {
     setShowModal(false);
 
      try {
-          const res = await fetch("http://10.0.2.2:8000/requests/accept", {
+          const res = await fetch(`${BASE_URL}/requests/accept`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ requestId: selectedRequest?.id }),
@@ -175,7 +192,7 @@ const MessageScreen = () => {
     setSelectedRequest(null);
     setShowModal(false);
      try {
-          const res = await fetch("http://10.0.2.2:8000/requests/reject", {
+          const res = await fetch(`${BASE_URL}/requests/reject`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ requestId: selectedRequest?.id }),

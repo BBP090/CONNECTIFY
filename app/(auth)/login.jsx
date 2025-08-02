@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { useSignIn } from '@clerk/clerk-expo'
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
+
 
 const LoginScreen = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -22,7 +24,7 @@ const LoginScreen = () => {
 
 
       // ✅ Send user email to backend MySQL
-      await fetch('http://10.0.2.2:8000/api/add-user', {
+      await fetch(`${BASE_URL}/api/add-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

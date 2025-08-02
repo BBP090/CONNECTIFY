@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
-const GetUserID = () => {
+
+const useGetUserID = () => {
   const { user } = useUser();
   const [emailAddress, setEmailAddress] = useState('');
   const [userId, setUserId] = useState(null);
@@ -22,7 +24,7 @@ const GetUserID = () => {
       if (!emailAddress) return;
 
       try {
-        const res = await fetch("http://10.0.2.2:8000/get-user-id", {
+        const res = await fetch(`${BASE_URL}/get-user-id`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: emailAddress }),
@@ -45,4 +47,4 @@ const GetUserID = () => {
   return { userId, emailAddress, loading: !userId && !!emailAddress };
 };
 
-export default GetUserID;
+export default useGetUserID;

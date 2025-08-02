@@ -9,11 +9,11 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import GetUserID from "../hooks/GetUserID";
+import useGetUserID from "../hooks/useGetUserID";
 
 const SendRequest = () => {
   const navigation = useNavigation();
-  const { userId: loggedInUserId, loading: idLoading } = GetUserID();
+  const { userId: loggedInUserId, loading: idLoading } = useGetUserID();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 

@@ -1,35 +1,38 @@
+import { Entypo, Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { useEffect, useRef, useState } from "react";
 import {
+  Image,
+  KeyboardAvoidingView,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
-  ScrollView,
-  KeyboardAvoidingView,
   TextInput,
-  Pressable,
-  Image,
+  View,
 } from "react-native";
-import React, { useEffect, useState, useRef } from "react";
-import { Feather, Ionicons, FontAwesome, MaterialIcons, Entypo } from "@expo/vector-icons";
-import EmojiSelector from "react-native-emoji-selector";
-import * as ImagePicker from "expo-image-picker";
-import { useNavigation } from "@react-navigation/native";
-import GetUserID from "./hooks/GetUserID";
+
 import { useLocalSearchParams } from "expo-router";
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import SimpleEmojiPicker from './hooks/SimpleEmojiPicker'; // Adjust path as needed
+import useGetUserID from "./hooks/useGetUserID";
+
 
 
 
 
 import io from "socket.io-client";
-
-const socket = io("http://10.0.2.2:8000");  // Localhost for Android emulator
+import { BASE_URL } from "../config/config"; // adjust the path as needed
+const socket = io(`${BASE_URL}`);  // Localhost for Android emulator
 
 
 const ChatMessagesScreen = () => {
   const { chatId } = useLocalSearchParams();
-  const { userId: userId, loading: idLoading } = GetUserID();
+  const [receiverId, setReceiverId]= useState(null);
+  const [chat, setChat]= useState(null);
+  const { userId: userId, loading: idLoading } = useGetUserID();
   const [showEmojiSelector, setShowEmojiSelector] = useState(false);
     const [loading, setLoading] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState([]);
@@ -39,12 +42,36 @@ const ChatMessagesScreen = () => {
   const scrollViewRef = useRef(null);
 
 
+
+// custom user effect to retrieve the message recipient's id.
+useEffect(()=>{
+  if (!chatId) return;
+  setLoading(true);
+  fetch(`${BASE_URL}/chat/${chatId}/recipientId`)
+          .then((res) => res.json())
+          .then((data) => {
+            
+            setChat(data);
+          })
+          .catch((err) => console.error(err))
+          .finally(() => setLoading(false));
+
+}, [chatId]);
+
+useEffect(()=>{
+  if (!chat) return;
+
+  const id= chat.user1_id === userId ? chat.user2_id : chat.user1_id;
+  setReceiverId(id);
+}, [chat, userId]);
+
+
     // Fetch all message requests and filter out self
       useEffect(() => {
         if (!userId) return;
     
         setLoading(true);
-        fetch(`http://10.0.2.2:8000/chat/${chatId}/messages`)
+        fetch(`${BASE_URL}/chat/${chatId}/messages`)
           .then((res) => res.json())
           .then((data) => {
             
@@ -69,8 +96,9 @@ const ChatMessagesScreen = () => {
   };
 }, [chatId, userId]);
 
-  
+//const receiverId = chat.user1_id === userId ? chat.user2_id : chat.user1_id;
 
+////////
   const scrollToBottom = () => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: false });
@@ -90,6 +118,8 @@ const ChatMessagesScreen = () => {
     return new Date(time).toLocaleString("en-US", options);
   };
 
+//const receiverId = chat.user1_id === userId ? chat.user2_id : chat.user1_id;
+// id: result 
 
 const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
@@ -126,6 +156,7 @@ const handleSend = () => {
     timeStamp: new Date(),
     senderId: userId,
     chatId: chatId,
+    receiverId
   };
 
   socket.emit("sendMessage", newMessage);
