@@ -297,3 +297,13 @@ app.get('/chat/:chatId/recipientId', (req, res)=>{
     }
   );
 });
+
+// dleete entrie chats:
+app.delete("/delete_chat/:chatId", (req, res) => {
+  const chatId = req.params.chatId;
+  // delete from DB...
+  db.query("DELETE FROM ongoing_chats WHERE id = ?", [chatId], (err) => {
+    if (err) return res.status(500).send("Failed");
+    res.sendStatus(200);
+  });
+});

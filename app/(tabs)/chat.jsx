@@ -35,6 +35,10 @@ const MessageScreen = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [readMessages, setReadMessages]= useState({});
+  const [chatToDelete, setChatToDelete] = useState(null);
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const router= useRouter();
 
   const fuse = new Fuse(ongoingMessages ?? [], {
@@ -311,6 +315,12 @@ useEffect(() => {
       onPress={() =>
         isRequest ? handleRequestPress(item) : handleOngoingPress(item)
       }
+      onLongPress={() => {
+    if (!isRequest) {
+      setChatToDelete(item);
+      setShowDeleteModal(true);
+    }
+  }}
     >
       <Image source={{ require: item.image }} style={styles.avatar} />
       <View style={styles.messageTextContainer}>
@@ -406,6 +416,80 @@ useEffect(() => {
           </View>
         </View>
       </Modal>
+
+      {/* First Modal: Ask to delete */}
+<Modal visible={showDeleteModal} transparent animationType="fade">
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Delete chat?</Text>
+      <View style={styles.modalButtons}>
+        <TouchableOpacity
+          style={styles.acceptBtn}
+          onPress={() => {
+            setShowDeleteModal(false);
+            setShowConfirmModal(true);
+          }}
+        >
+          <Text style={styles.btnText}>Yes</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.rejectBtn}
+          onPress={() => {
+            setShowDeleteModal(false);
+            setChatToDelete(null);
+          }}
+        >
+          <Text style={styles.btnText}>No</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
+{/* Second Modal: Final Confirmation */}
+<Modal visible={showConfirmModal} transparent animationType="fade">
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Are you absolutely sure?</Text>
+      <View style={styles.modalButtons}>
+        <TouchableOpacity
+          style={styles.acceptBtn}
+          onPress={async () => {
+            try {
+              const res = await fetch(`${BASE_URL}/delete_chat/${chatToDelete.id}`, {
+                method: 'DELETE',
+              });
+              if (res.ok) {
+                setOngoingMessages((prev) =>
+                  prev.filter((chat) => chat.id !== chatToDelete.id)
+                );
+              } else {
+                console.error("Failed to delete chat");
+              }
+            } catch (err) {
+              console.error("Error:", err);
+            } finally {
+              setShowConfirmModal(false);
+              setChatToDelete(null);
+            }
+          }}
+        >
+          <Text style={styles.btnText}>Yes, Delete</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.rejectBtn}
+          onPress={() => {
+            setShowConfirmModal(false);
+            setChatToDelete(null);
+          }}
+        >
+          <Text style={styles.btnText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
     </View>
     </View>
     </TouchableWithoutFeedback>
