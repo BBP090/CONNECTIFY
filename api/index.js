@@ -214,10 +214,15 @@ app.get('/ongoing_messages/:userId', (req,res)=>{
 
   //SELECT ongoing_chats.id AS id,ongoing_chats.started_at AS timestamp,CASE WHEN ongoing_chats.user1_id=? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id=? THEN ongoing_chats.last_message2 ELSE NULL END AS message,users.id AS userId,users.name,users.profile_image  FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?)
 
-  db.query(
-    `SELECT ongoing_chats.id AS id, messages.message AS message, messages.timestamp AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id = ongoing_chats.user1_id AND ongoing_chats.user2_id = ?) OR (users.id = ongoing_chats.user2_id AND ongoing_chats.user1_id = ?) LEFT JOIN messages ON messages.id = CASE WHEN ongoing_chats.user1_id = ? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id = ? THEN ongoing_chats.last_message2 ELSE NULL END
+  //SELECT ongoing_chats.id AS id, IFNULL(messages.message,'You accepted the message request') AS message, IFNULL(messages.timestamp,ongoing_chats.started_at) AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?) LEFT JOIN messages ON messages.id=IF(ongoing_chats.user1_id=?, ongoing_chats.last_message1, ongoing_chats.last_message2)
 
-`,    [userId, userId, userId, userId],
+  //SELECT ongoing_chats.id AS id, messages.message AS message, messages.timestamp AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id = ongoing_chats.user1_id AND ongoing_chats.user2_id = ?) OR (users.id = ongoing_chats.user2_id AND ongoing_chats.user1_id = ?) LEFT JOIN messages ON messages.id = CASE WHEN ongoing_chats.user1_id = ? THEN ongoing_chats.last_message1 WHEN ongoing_chats.user2_id = ? THEN ongoing_chats.last_message2 ELSE NULL END
+
+  db.query(
+    `SELECT ongoing_chats.id AS id, IFNULL(messages.message,'You accepted the message request') AS message, IFNULL(messages.timestamp,ongoing_chats.started_at) AS timestamp, users.id AS userId, users.name, users.profile_image FROM ongoing_chats INNER JOIN users ON (users.id=ongoing_chats.user1_id AND ongoing_chats.user2_id=?) OR (users.id=ongoing_chats.user2_id AND ongoing_chats.user1_id=?) LEFT JOIN messages ON messages.id=IF(ongoing_chats.user1_id=?, ongoing_chats.last_message1, ongoing_chats.last_message2)
+
+
+`,    [userId, userId, userId],
     (err, results)=>{
       if (err) return res.status(500).json({error: err.message});
       res.json(results);
