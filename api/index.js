@@ -55,8 +55,8 @@ io.on("connection", (socket) => {
         message.chatId,
         message.senderId,
         message.messageType,
-        message.messageType === "text" ? message.message : null,
-        message.messageType === "image" ? message.imageUrl : message.message,
+        message.message,
+        message.imageUrl,
         new Date(message.timeStamp),
       ]
     );

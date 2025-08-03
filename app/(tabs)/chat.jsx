@@ -75,7 +75,8 @@ const SHARED_SECRET_KEY = "supersecretkey123";
     }, [userId])
   );
 
-    useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
   if (!userId) return;
 
   // Load cached ongoing messages from AsyncStorage immediately
@@ -117,7 +118,7 @@ const SHARED_SECRET_KEY = "supersecretkey123";
   return () => {
     socket.off("chat_updated");
   };
-}, [userId]);
+}, [userId]));
 
 
     ///new ajasjdhjashdasdhashdksahdjhajsdhajs

@@ -169,6 +169,7 @@ const handleSend = () => {
     _id: uuidv4(),
     messageType: "text",
     message: encryptedText,
+   
     timeStamp: new Date(),
     senderId: userId,
     chatId: chatId,
