@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { useSignIn, useAuth } from '@clerk/clerk-expo';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
-
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ForgotPasswordScreen from '../../components/ForgetPasswordScreen';
 
 export default function LoginScreen() {
   const { getToken } = useAuth();
@@ -14,9 +14,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
-  const [code, setCode] = useState('')
-  const [successfulCreation, setSuccessfulCreation] = useState(false)
-  const [secondFactor, setSecondFactor] = useState(false)
+  const [newPasswordPage, setNewPasswordPage] = useState(false);
 
   const onShowPassword = () => {
     if (hidePassword) {
@@ -24,13 +22,7 @@ export default function LoginScreen() {
     } else {
       setHidePassword(true);
     }
-  }
-
-  const sendCode = async () => {
-
-    setError('');
-
-  }
+  };
 
   const handleLogin = async () => {
 
@@ -89,11 +81,17 @@ export default function LoginScreen() {
 
   if (!isLoaded) return <Text>Loading.....</Text>;
 
+  if (newPasswordPage) {
+    return (
+      <ForgotPasswordScreen />
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    < View style={styles.container} >
 
       {/* Heading */}
-      <Text style={styles.title}>Hey,{"\n"}Welcome Back</Text>
+      < Text style={styles.title} > Hey, {"\n"}Welcome Back</Text >
 
       {/* error handling when credentials do not match or account not found  */}
       {
@@ -145,7 +143,7 @@ export default function LoginScreen() {
       </View>
 
       {/* Forgot Password */}
-      <TouchableOpacity onPress={() => { }} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
+      <TouchableOpacity onPress={() => { setNewPasswordPage(true) }} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
@@ -162,7 +160,7 @@ export default function LoginScreen() {
           Sign up
         </Text>
       </Text>
-    </View>
+    </View >
   );
 };
 
