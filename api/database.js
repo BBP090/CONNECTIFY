@@ -1,52 +1,82 @@
-// const mysql = require('mysql2');
-// const dotenv = require('dotenv');
-// dotenv.config();
+ const mysql = require('mysql2');
+ const dotenv = require('dotenv');
+ dotenv.config();
 
-// const connection = mysql.createConnection({
-//     host: process.env.DB_HOST,
-//     user: process.env.DB_USER,
-//     password: process.env.DB_PASSWORD,
-//     database: process.env.DB_DATABASE,
-//     multipleStatements: true
-// });
+const schema = `
+CREATE DATABASE IF NOT EXISTS chat_app;
 
-// const schema = 
-// "
-//     create table if not exists user( 
-//     user_ID int primary key auto_increment, 
-//     first_name varchar(255) not null,
-//     middle_name varchar(255) null,
-//     last_name varchar(255) null,
-//     DOB date not null, gender int null,
-//     district varchar(255) not null,
-//     city varchar(255) not null,
-//     street_address varchar(255) not null,
-//     date_created date not null,
-//     email varchar(255) not null,
-//     password varchar(255) not null,
-//     contact_no varchar(20)
-// )
+CREATE TABLE IF NOT EXISTS message_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  from_user_id INT NOT NULL,
+  to_user_id INT NOT NULL,
+  message TEXT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
-// create table if not exists chat(
-// 	chat_ID int primary key auto_increment,
-// 	sender_ID int,
-// 	receiver_ID int,
-//     text_message text,
-//     message_time timestamp default current_timestamp,
-//     foreign key(sender_ID) references user(user_ID) on delete cascade,
-//     foreign key(receiver_ID) references user(user_ID) on delete cascade
-// )
+CREATE TABLE IF NOT EXISTS ongoing_chats (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user1_id INT NOT NULL,
+  user2_id INT NOT NULL,
+  started_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
-// create table connections(
-// 	connection_ID int primary key auto_increment,
-//     request_sender_ID int,
-//     request_receiver_ID int,
-//     request_time timestamp,
-//     foreign key(request_sender_ID) references user(user_ID) on delete cascade,
-//     foreign key(request_receiver_ID) references user(user_ID) on delete cascade
-// );
-// ";
+CREATE TABLE IF NOT EXISTS messages (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  chat_id INT NOT NULL,
+  sender_id INT NOT NULL,
+  message TEXT,
+  message_type ENUM('text', 'image') NOT NULL,
+  image_url TEXT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  profile_image TEXT
+);
+
+CREATE TABLE IF NOT EXISTS preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  preference VARCHAR(255) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE users MODIFY name VARCHAR(255) NULL;
+
+
+`;
+ 
+//// ALTER TABLE users ADD email VARCHAR(255) NULL;
+
+ const db = mysql.createPool({
+     host: process.env.DB_HOST,
+     user: process.env.DB_USER,
+     password: process.env.DB_PASSWORD,
+     database: 'chat_app',
+     multipleStatements: true
+ });
+
+// ✅ Use a connection from the pool to set up the schema once
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("❌ Error getting connection from pool:", err.stack);
+    return;
+  }
+  console.log("✅ Connected to MySQL pool");
+
+  connection.query(schema, (err) => {
+    if (err) {
+      console.error("❌ Error executing schema:", err.message);
+    } else {
+      console.log("✅ Database and tables created!");
+    }
+    connection.release(); // ✅ Don't end the pool, just release this one connection
+  });
+});
+
+module.exports = db;
 // connection.connect(function(err) {
 //   if (err) throw err;
 //   console.log("Connected!");
@@ -63,4 +93,3 @@
 // //     database: "your_database_name"
 // // })
 
-// // module.exports= pool;

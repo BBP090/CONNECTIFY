@@ -14,10 +14,10 @@ const ProfilePage = () => {
       </View>
       <Text style={styles.username}>Username</Text>
 
-      <TouchableOpacity style={styles.connectButton}>
-        <Text style={styles.connectText}>Connect</Text>
+      {/* <TouchableOpacity style={styles.connectButton}> */}
+        {/* <Text style={styles.connectText}>Connect</Text> */}
         {/* <View style={styles.greenDot} /> */}
-      </TouchableOpacity>
+      {/* </TouchableOpacity> */}
 
       <View style={styles.bioContainer}>
         <Text>

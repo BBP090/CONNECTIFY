@@ -1,16 +1,33 @@
+import { useAuth, useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-expo'
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+//import ForgotPasswordScreen from '../../components/ForgotPasswordScreen';
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
-const LoginScreen = () => {
+export default function LoginScreen() {
+  const { getToken } = useAuth();
   const { signIn, setActive, isLoaded } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [hidePassword, setHidePassword] = useState(true);
+  const [newPasswordPage, setNewPasswordPage] = useState(false);
+
+  const onShowPassword = () => {
+    if (hidePassword) {
+      setHidePassword(false);
+    } else {
+      setHidePassword(true);
+    }
+  };
 
   const handleLogin = async () => {
-    if (!isLoaded) return;
+
+    setError('');
+    console.log("login pressed");
 
     try {
       const signInAttempt = await signIn.create({
@@ -19,29 +36,88 @@ const LoginScreen = () => {
       });
 
       if (signInAttempt.status === "complete") {
+
         await setActive({ session: signInAttempt.createdSessionId });
+        console.log("signin in successful");
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
+        try {
+          const token = await getToken();
+          console.log('🔑 Token present:', !!token);
+          console.log('🌐 Calling API:', `${BASE_URL}/api/add-user`);
+          // ✅ Send user email to backend MySQL
+          const response = await fetch(`${BASE_URL}/api/add-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ email: email }),
+          });
+
+          console.log('📡 Response status:', response.status);
+          const data = await response.json();
+          console.log('📦 Response data:', data);
+
+          if (!response.ok) {
+            console.log("API call failed", response.ok);
+          }
+        } catch (error) {
+          console.error("Error adding user:", error);
+        }
+
         router.replace('/');
       } else {
-        console.error(JSON.stringify(signInAttempt, null, 2))
+        console.error(JSON.stringify(signInAttempt, null, 2));
       }
     }
     catch (err) {
       console.error(JSON.stringify(err, null, 2))
+      if (err) {
+        setError(err.errors);
+      }
     }
   };
 
+  if (!isLoaded) return <Text>Loading.....</Text>;
+
+  /*if (newPasswordPage) {
+    return (
+      <ForgotPasswordScreen />
+    );
+  }*/
+
   return (
-    <View style={styles.container}>
+    < View style={styles.container} >
 
       {/* Heading */}
-      <Text style={styles.title}>Hey,{"\n"}Welcome Back</Text>
+      < Text style={styles.title} > Hey, {"\n"}Welcome Back</Text >
+
+      {/* error handling when credentials do not match or account not found  */}
+      {
+        error &&
+        <View style={styles.errorContainer}>
+          <FlatList
+            data={error}
+            renderItem={(item) => {
+              { console.log(item.item.longMessage); }
+              return (
+                <View key={item.item.code} style={{ flexDirection: 'row', padding: 6 }}>
+                  <MaterialIcons name='error-outline' size={23} color='red' />
+                  <Text style={styles.errorMsg}>{item.item.longMessage}</Text>
+                </View>
+              )
+            }}
+          />
+        </View>
+      }
 
       {/* Subtitle */}
       {/* <Text style={styles.subtitle}>Please login to continue</Text> */}
 
       {/* Email Input */}
       <View style={styles.inputContainer}>
-        {/* <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} /> */}
+        <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
           placeholder="Enter your email"
           style={styles.input}
@@ -52,25 +128,28 @@ const LoginScreen = () => {
       </View>
 
       {/* Password Input */}
-      <View style={styles.inputContainer}>
-        {/* <Ionicons name="lock-closed-outline" size={20} color="#008000" style={styles.icon} /> */}
+      <View style={[styles.inputContainer, { justifyContent: 'space-between' }]}>
+        <Ionicons name="lock-closed-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
           placeholder="Enter your password"
           style={styles.input}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
-          onPress
-          /> 
+          secureTextEntry={hidePassword}
+        />
+        <TouchableOpacity onPress={onShowPassword} style={styles.icon}>
+          <MaterialIcons name="visibility-off" size={19} />
+        </TouchableOpacity>
       </View>
 
       {/* Forgot Password */}
-      <TouchableOpacity onPress={() => { }} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
+      <TouchableOpacity onPress={() => { setNewPasswordPage(true) }} style={{ alignSelf: 'flex-end', marginBottom: 20 }}>
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
 
       {/* Login Button */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+      <TouchableOpacity style={styles.loginButton}
+        onPress={handleLogin}>
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
 
@@ -81,13 +160,23 @@ const LoginScreen = () => {
           Sign up
         </Text>
       </Text>
-    </View>
+    </View >
   );
 };
 
-export default LoginScreen;
+// export default LoginScreen;
 
 const styles = StyleSheet.create({
+  errorContainer: {
+    borderRadius: 10,
+    backgroundColor: '#ffc8c8ff',
+    marginBottom: 7,
+    marginHorizontal: 1,
+  },
+  errorMsg: {
+    paddingHorizontal: 5,
+    fontSize: 15,
+  },
   container: {
     flex: 1,
     padding: 24,
@@ -122,10 +211,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   icon: {
-    marginRight: 10,
+    marginHorizontal: 10,
   },
   input: {
-    flex:1,
+    flex: 1,
     height: 48,
     paddingHorizontal: 10,
   },
