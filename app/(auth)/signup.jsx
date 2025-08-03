@@ -1,4 +1,6 @@
+import { useSignUp } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useSignUp, useAuth } from '@clerk/clerk-expo';

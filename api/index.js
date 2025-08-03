@@ -318,3 +318,22 @@ app.delete("/delete_chat/:chatId", (req, res) => {
     res.sendStatus(200);
   });
 });
+
+// API endpoint to handle user preferences
+app.post("/api/user/preferences", (req, res) => {
+  const { userId, email, preferences } = req.body;
+
+  if (!userId || !preferences) {
+    return res.status(400).json({ error: "User ID and preferences are required." });
+  }
+
+  // Insert preferences into the preferences table
+  const query = "INSERT INTO preferences (user_id, preference) VALUES (?, ?)";
+  db.query(query, [userId, JSON.stringify(preferences)], (err, result) => {
+    if (err) {
+      console.error("Error inserting preferences:", err);
+      return res.status(500).json({ error: "Failed to save preferences" });
+    }
+    res.status(200).json({ success: true, message: "Preferences saved successfully" });
+  });
+});
