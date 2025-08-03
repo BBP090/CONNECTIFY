@@ -1,11 +1,11 @@
-import { router } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { useSignIn, useAuth } from '@clerk/clerk-expo';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
-import { BASE_URL } from "../../config/config"; // adjust the path as needed
+import { useAuth, useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ForgotPasswordScreen from '../../components/ForgetPasswordScreen';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ForgotPasswordScreen from '../../components/ForgotPasswordScreen';
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
 export default function LoginScreen() {
   const { getToken } = useAuth();
@@ -38,7 +38,7 @@ export default function LoginScreen() {
       if (signInAttempt.status === "complete") {
 
         await setActive({ session: signInAttempt.createdSessionId });
-        console.log("signin in successful");
+        console.log("signin successful");
         await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
         try {
@@ -91,7 +91,7 @@ export default function LoginScreen() {
     < View style={styles.container} >
 
       {/* Heading */}
-      < Text style={styles.title} > Hey, {"\n"}Welcome Back</Text >
+      < Text style={styles.title} >Hey, {"\n"}Welcome Back</Text >
 
       {/* error handling when credentials do not match or account not found  */}
       {

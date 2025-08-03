@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import { Pressable, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
-
+import VerificationScreen from '../../components/VerificationScreen';
 
 export default function SignUpScreen() {
   const { signUp, isLoaded, setActive } = useSignUp();
@@ -15,6 +15,8 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const { getToken } = useAuth();
 
   const onShowPassword = () => {
     if (showPassword) {
@@ -65,59 +67,77 @@ export default function SignUpScreen() {
   };
 
   // handle submission of verification form
-  const onVerifyPress = async () => {
+  // const onVerifyPress = async () => {
 
-    try {
-      // attempt for verification with the code provided by the user against the code sent
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
-      // returns object with current signUp status, sessionid
+  //   setLoading(true);
+  //   try {
+  //     // attempt for verification with the code provided by the user against the code sent
+  //     const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
+  //     // returns object with current signUp status, sessionid
 
-      // if the verification process is completed set user to active and redirect to another page
-      if (signUpAttempt.status === "complete") {
-        // ✅ Send user email to backend MySQL
-        // const response = await fetch(`${BASE_URL}/api/add-user`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ email: emailAddress }),
-        // });
+  //     // if the verification process is completed set user to active and redirect to another page
+  //     if (signUpAttempt.status === "complete") {
+  //       await setActive({ session: signUpAttempt.createdSessionId });
+  //       console.log("signup successful");
+  //       await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
-        // if (!response.ok) {
-        //   console.log("API call failed!!");
-        // }
+  //       try {
+  //         const token = await getToken();
+  //         console.log('🔑 Token present:', !!token);
+  //         console.log('🌐 Calling API:', `${BASE_URL}/api/add-user`);
+  //         // ✅ Send user email to backend MySQL
+  //         const response = await fetch(`${BASE_URL}/api/add-user`, {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             'Authorization': `Bearer ${token}`,
+  //           },
+  //           body: JSON.stringify({ email: emailAddress }),
+  //         });
 
-        await setActive({ session: signUpAttempt.createdSessionId });
+  //         console.log('📡 Response status:', response.status);
+  //         const data = await response.json();
+  //         console.log('📦 Response data:', data);
 
-        router.replace('/');
-      }
-      else {
-        // if the status is not 'complete' then check why
-        console.error(JSON.stringify(error, null, 2));
-      }
-    }
-    catch (err) {
-      console.error(JSON.stringify(err, null, 2));
-    };
-  };
+  //         if (!response.ok) {
+  //           console.log("API call failed", response.ok);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error adding user:", error);
+  //       }
+
+
+  //       router.replace('/');
+  //     }
+  //     else {
+  //       // if the status is not 'complete' then check why
+  //       console.error(JSON.stringify(error, null, 2));
+  //     }
+  //   }
+  //   catch (err) {
+  //     console.error(JSON.stringify(err, null, 2));
+  //     setLoading(false);
+  //   };
+  // };
 
   if (!isLoaded) return <Text>Loading.....</Text>;
 
   // when the user starts verification process display the following content
   if (pendingVerification) {
     return (
-      <View>
-        <Text>Verify Your Email</Text>
-        <TextInput
-          placeholder='Enter your code!'
-          value={code}
-          onChangeText={setCode}
-        />
-        <Pressable onPress={onVerifyPress}>
-          <Text>Verify</Text>
-        </Pressable>
-      </View>
-    )
+      // <View>
+      //   <Text>Verify Your Email</Text>
+      //   <TextInput
+      //     placeholder='Enter your code!'
+      //     value={code}
+      //     onChangeText={setCode}
+      //   />
+      //   <Pressable onPress={onVerifyPress}>
+      //     <Text>Verify</Text>
+      //   </Pressable>
+      // </View>
+      <VerificationScreen emailAddress={emailAddress} />
+    );
   }
 
   return (

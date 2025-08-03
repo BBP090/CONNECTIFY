@@ -1,20 +1,19 @@
+import { useClerk } from '@clerk/clerk-expo';
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import { useState } from "react";
 import {
   Modal,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import ChangePasswordScreen from '../components/ChangePasswordScreen';
 import { Colors } from "./constants/theme";
-import { router } from 'expo-router';
-import { SignOutButton } from "../components/SignOutButton";
-import { useClerk } from '@clerk/clerk-expo'
-import * as Linking from 'expo-linking'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function SettingsScreen() {
@@ -29,12 +28,12 @@ export default function SettingsScreen() {
 
   const handleSignOut = async () => {
     try {
-       // Clear AsyncStorage first
+      // Clear AsyncStorage first
       await AsyncStorage.clear();
       await signOut();
       // Redirect to your desired page
-       // ⚠️ Wait briefly to ensure session is cleared
-   
+      // ⚠️ Wait briefly to ensure session is cleared
+
       Linking.openURL(Linking.createURL('/login'))
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling
@@ -72,6 +71,9 @@ export default function SettingsScreen() {
   const inputBg = darkMode ? "#1a1a1a" : Colors.white;
   const borderColor = darkMode ? "#333" : Colors.grey;
 
+  if (showChangePassword)
+    return <ChangePasswordScreen />;
+
   return (
 
     <>
@@ -96,46 +98,6 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
         </TouchableOpacity>
 
-        {showChangePassword && (
-          <View style={styles.passwordForm}>
-            <TextInput
-              placeholder="Old Password"
-              placeholderTextColor={darkMode ? "#aaa" : "#555"}
-              style={[
-                styles.input,
-                { backgroundColor: inputBg, color: textColor, borderColor: borderColor },
-              ]}
-              secureTextEntry
-              value={oldPassword}
-              onChangeText={setOldPassword}
-            />
-            <TextInput
-              placeholder="New Password"
-              placeholderTextColor={darkMode ? "#aaa" : "#555"}
-              style={[
-                styles.input,
-                { backgroundColor: inputBg, color: textColor, borderColor: borderColor },
-              ]}
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TextInput
-              placeholder="Confirm New Password"
-              placeholderTextColor={darkMode ? "#aaa" : "#555"}
-              style={[
-                styles.input,
-                { backgroundColor: inputBg, color: textColor, borderColor: borderColor },
-              ]}
-              secureTextEntry
-              value={confirmNewPassword}
-              onChangeText={setConfirmNewPassword}
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleChangePassword}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* Theme Toggle Option */}
         <TouchableOpacity

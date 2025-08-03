@@ -5,6 +5,7 @@ import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } 
 import UserProfileFeed from '../../components/UserProfileFeed';
 import FeedTags from '../../components/FeedTags';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import useGetUserID from '../hooks/useGetUserID';
 
 // const placeHolderImage = require("../../assets/image/background.png");
 const smallImgSource = require("../../assets/images/background.png");
@@ -14,42 +15,9 @@ const user_name = "Bishist Bikram Pant"
 export default function Home() {
     const { isSignedIn, getToken } = useAuth();
     const { user } = useUser();
-    const API_URL = 'http://localhost:8000/api';
+    const {userId, emailAddress} = useGetUserID();
 
     console.log(isSignedIn);
-
-    // useEffect(() => {
-    //     // console.log("Logged in:", loggedIn);          // ✅ CHECKPOINT 4
-    //     console.log("User from Clerk:", user);
-    //     const sendUser = async () => {
-    //         if (!user) return;
-    //         console.log("user is now available", user);
-
-    //         const token = await getToken();
-    //         const emailFromClerk = user.primaryEmailAddress?.emailAddress;
-    //         console.log("User email:", emailFromClerk);
-
-    //         try {
-    //             const res = await fetch(`${API_URL}/user/signup`, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     Authorization: `Bearer ${token}`,
-    //                 },
-    //                 body: JSON.stringify({
-    //                     emailAddress: emailFromClerk,
-    //                 }),
-    //             });
-
-    //             const data = await res.json();
-    //             console.log('Backend response:', data);
-    //         } catch (error) {
-    //             console.error('Fetch user failed:', error);
-    //         }
-    //     }
-
-    //     sendUser();
-    // }, [user]);
 
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold,
