@@ -3,8 +3,7 @@
  dotenv.config();
 
 
-const schema = `
-CREATE DATABASE IF NOT EXISTS chat_app;
+const schema = `CREATE DATABASE IF NOT EXISTS chat_app;
 
 CREATE TABLE IF NOT EXISTS message_requests (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,9 +33,16 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  email TEXT,
+  DoB DATE,
+  Gender ENUM('Male', 'Female', 'Other'),
+  Address TEXT,
+  Contact TEXT,
   profile_image TEXT
 );
-`;
+alter table ongoing_chats add column last_message1 int;
+alter table ongoing_chats add column last_message2 int;
+ALTER TABLE users MODIFY name VARCHAR(255) NULL;`;
 
  const db = mysql.createPool({
      host: process.env.DB_HOST,

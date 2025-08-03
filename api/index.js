@@ -312,3 +312,53 @@ app.delete("/delete_chat/:chatId", (req, res) => {
     res.sendStatus(200);
   });
 });
+
+app.post('/update-user-by-id', (req, res) => {
+  const { userId, userName, dob, gender, address, contact } = req.body;
+
+  if (!userId || !userName || !dob || !gender || !address || !contact) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  const query = `
+    UPDATE users 
+    SET Name = ?, dob = ?, gender = ?, address = ?, contact = ? 
+    WHERE id = ?
+  `;
+
+  const values = [userName, dob, gender, address, contact, userId];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User profile updated successfully" });
+  });
+});
+
+app.post('/get-user-by-id', (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) return res.status(400).json({ error: "User ID is required" });
+
+  const query = 'SELECT Name, dob, gender, address, contact FROM users WHERE id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("DB error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json(results[0]);
+  });
+});

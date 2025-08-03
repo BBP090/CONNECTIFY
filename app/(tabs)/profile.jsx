@@ -1,30 +1,66 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
-const router = useRouter();
+
 const ProfilePage = () => {
+  const router = useRouter();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert('Permission to access media is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.6, // compression
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setSelectedImage(uri);
+      setModalVisible(false);
+
+      // 🔁 Optionally: upload here
+      // await uploadImage(uri);
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.profileCircle}>
-        <Image style={styles.profileImage} source={require("../../assets/images/pfp.png")} />
-        
-        {/* edit profile button */}
-        <TouchableOpacity>
-          <Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text>
+      <View style={styles.rowLayout}>
+        {/* 🔘 Change Picture */}
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text style={styles.sideButton}>Change Picture</Text>
+        </TouchableOpacity>
+
+        {/* 🖼️ Profile Image */}
+        <View style={styles.profileCircle}>
+          <Image
+            style={styles.profileImage}
+            source={selectedImage ? { uri: selectedImage } : require("../../assets/images/pfp.png")}
+          />
+        </View>
+
+        {/* 🔘 Edit Profile */}
+        <TouchableOpacity onPress={() => router.push('/editProfile')}>
+          <Text style={styles.sideButton}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
+      {/* Username and rest */}
       <Text style={styles.username}>Username</Text>
 
-      {/* <TouchableOpacity style={styles.connectButton}> */}
-        {/* <Text style={styles.connectText}>Connect</Text> */}
-        {/* <View style={styles.greenDot} /> */}
-      {/* </TouchableOpacity> */}
-
       <View style={styles.bioContainer}>
-        <Text>
-          Bio here
-        </Text>
+        <Text>Bio here</Text>
       </View>
 
+      {/* Photos tab */}
       <View style={styles.photosTab}>
         <Text style={styles.photosTabText}>Photos</Text>
       </View>
@@ -40,9 +76,26 @@ const ProfilePage = () => {
           <Image style={styles.photos} source={require("../../assets/images/emoji3.png")} />
         </View>
       </View>
+
+      {/* 🔳 Popup Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>Select Profile Picture</Text>
+            <Button title="Choose from Gallery" onPress={handlePickImage} />
+            <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -68,7 +121,7 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     resizeMode: 'cover', // or 'contain'
   },
-  editProfile: {
+  editButton: {
     marginHorizontal: 10,
     fontSize: 16,
     color: '#333',
@@ -141,7 +194,38 @@ const styles = StyleSheet.create({
   photos: {
     width: 130,
     height: 150,
-  }
+  },
+  modalBackground: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+},
+modalContainer: {
+  width: 300,
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  elevation: 10,
+  alignItems: 'center',
+},
+rowLayout: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 20,
+  marginBottom: 20,
+  gap: 10,
+},
+
+sideButton: {
+  fontSize: 14,
+  color: '#333',
+  textDecorationLine: 'underline',
+  maxWidth: 80,
+  textAlign: 'center',
+},
+
 });
 
 export default ProfilePage;
