@@ -1,9 +1,9 @@
+import { useSignUp } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSignUp } from '@clerk/clerk-expo';
-import { Pressable, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
 
