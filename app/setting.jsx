@@ -31,7 +31,7 @@ export default function SettingsScreen() {
     try {
        // Clear AsyncStorage first
       await AsyncStorage.clear();
-      await signOut()
+      await signOut();
       // Redirect to your desired page
        // ⚠️ Wait briefly to ensure session is cleared
    

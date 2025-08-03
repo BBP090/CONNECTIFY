@@ -1,6 +1,6 @@
- const mysql = require('mysql2');
- const dotenv = require('dotenv');
- dotenv.config();
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
+dotenv.config();
 
 
 const schema = `
@@ -36,15 +36,17 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255) NOT NULL,
   profile_image TEXT
 );
+
+ALTER TABLE users MODIFY name VARCHAR(255) NULL;
 `;
 
- const db = mysql.createPool({
-     host: process.env.DB_HOST,
-     user: process.env.DB_USER,
-     password: process.env.DB_PASSWORD,
-     database: 'chat_app',
-     multipleStatements: true
- });
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: 'chat_app',
+  multipleStatements: true
+});
 
 
 

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-expo';
+import { useState, useEffect } from 'react';
+import { useSignIn, useAuth } from '@clerk/clerk-expo';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
@@ -8,11 +8,15 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function LoginScreen() {
+  const { getToken } = useAuth();
   const { signIn, setActive, isLoaded } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
+  const [code, setCode] = useState('')
+  const [successfulCreation, setSuccessfulCreation] = useState(false)
+  const [secondFactor, setSecondFactor] = useState(false)
 
   const onShowPassword = () => {
     if (hidePassword) {
@@ -22,9 +26,15 @@ export default function LoginScreen() {
     }
   }
 
+  const sendCode = async () => {
+
+    setError('');
+
+  }
+
   const handleLogin = async () => {
 
-    setError(undefined);
+    setError('');
     console.log("login pressed");
 
     try {
@@ -34,19 +44,36 @@ export default function LoginScreen() {
       });
 
       if (signInAttempt.status === "complete") {
-        console.log("signin in successful");
 
-
-      // ✅ Send user email to backend MySQL
-      await fetch(`${BASE_URL}/api/add-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: email }),
-      });
-      
         await setActive({ session: signInAttempt.createdSessionId });
+        console.log("signin in successful");
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
+        try {
+          const token = await getToken();
+          console.log('🔑 Token present:', !!token);
+          console.log('🌐 Calling API:', `${BASE_URL}/api/add-user`);
+          // ✅ Send user email to backend MySQL
+          const response = await fetch(`${BASE_URL}/api/add-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ email: email }),
+          });
+
+          console.log('📡 Response status:', response.status);
+          const data = await response.json();
+          console.log('📦 Response data:', data);
+
+          if (!response.ok) {
+            console.log("API call failed", response.ok);
+          }
+        } catch (error) {
+          console.error("Error adding user:", error);
+        }
+
         router.replace('/');
       } else {
         console.error(JSON.stringify(signInAttempt, null, 2));
