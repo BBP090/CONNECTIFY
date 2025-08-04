@@ -367,29 +367,61 @@ app.post('/get-user-by-id', (req, res) => {
 });
 
 
-//Disk Storage
+// Disk storage config
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Ensure this folder exists in the root
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this directory exists
   },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueName);
+  filename: function (req, file, cb) {
+    const filename = Date.now() + '-' + file.originalname;
+    cb(null, filename);
   }
 });
 
 const upload = multer({ storage });
 
 app.post('/upload-image', upload.single('image'), (req, res) => {
+  const userId = req.body.userId;
+  const file = req.file;
 
-  console.log(`file is : ${req.file}`);
-  if (!req.file) {
+  console.log("userId:", userId);
+  console.log("uploaded file:", file);
+
+  if (!file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  res.status(200).json({
-    message: 'Image uploaded successfully',
-    filename: req.file.filename,
-    url: `${BASE_URL}/uploads/${req.file.filename}`,
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  const imagePath = `/uploads/${file.filename}`; // relative path to serve later
+
+  const query = `UPDATE users SET profile_image = ? WHERE id = ?`;
+  db.query(query, [imagePath, userId], (err, result) => {
+    if (err) {
+      console.error("DB error while updating image:", err);
+      return res.status(500).json({ error: 'Failed to update profile image in database' });
+    }
+
+    res.status(200).json({
+      message: 'Image uploaded and profile updated successfully',
+      url: `${BASE_URL}${imagePath}`
+    });
+  });
+});
+
+//Retrieve profile info
+app.get('/user/:id', (req, res) => {
+  const userId = req.params.id;
+
+  const query = 'SELECT Name, dob, gender, address, contact, profile_image FROM users WHERE id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: "Database error" });
+
+    if (results.length === 0) return res.status(404).json({ error: "User not found" });
+
+    return res.status(200).json(results[0]);
   });
 });
