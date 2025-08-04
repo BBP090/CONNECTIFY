@@ -24,6 +24,7 @@ export default function Home() {
 
     // console log to check sign in state and users retrieved
     console.log(isSignedIn);
+    console.log(userId);
     console.log('users:', users);
     console.log('selected tags:', selectedTags);
 
@@ -34,6 +35,11 @@ export default function Home() {
             try {
                 // const token = await getToken();
                 // console.log('Token present:', !!token);
+
+                // const params = new URLSearchParams();
+                // params.append('userId', userId);
+                // selectedTags.forEach(tag => params.append('tags', tag));
+
                 console.log('Calling API:', `${BASE_URL}/api/get-userProfile?userId=${userId}`);
                 // ✅ Send user email to backend MySQL
                 const response = await fetch(`${BASE_URL}/api/get-userProfile?userId=${userId}`, {
@@ -57,7 +63,39 @@ export default function Home() {
             }
         }
         retrieveUser();
-    }, [userId]);
+
+        // to filter users by tags
+        const retrieveUserByTags = async () => {
+            if (!userId) return;
+
+            console.log('tags', selectedTags);
+            try {
+                const params = new URLSearchParams();
+                params.append('userId', userId);
+                selectedTags.forEach(tag => params.append('tags', tag));
+
+                console.log('Calling API to retreive users by tags', `${BASE_URL}/api/get-user-profile-by-tags?${params.toString()}`);
+
+                const response1 = await fetch(`${BASE_URL}/api/get-user-profile-by-tags?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data1 = await response1.json();
+                console.log('users by tags:', data1.result1);
+                setUsers(users.concat(data1.result1));
+            } catch (err) {
+                console.error('Error retrieving users by tags:', err);
+            }
+        }
+
+        if (selectedTags)
+            retrieveUserByTags();
+
+    }, [userId, selectedTags]);
+
 
     const issSelected = (item) => (selectedTags.includes(item));
 
@@ -88,7 +126,18 @@ export default function Home() {
             <ScrollView
                 contentContainerStyle={Platform.OS === "web" && { alignItems: "center" }}
             >
-                <UserProfileFeed
+                {
+                    users && users.map((user) => {
+                        return (
+                            <UserProfileFeed
+                                smallImgSource={smallImgSource}
+                                profileFeedImgSource={profileFeedImgSource}
+                                userName={user.userId}
+                            />
+                        )
+                    })
+                }
+                {/* <UserProfileFeed
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
                     userName={user_name}
@@ -102,7 +151,7 @@ export default function Home() {
                     smallImgSource={smallImgSource}
                     profileFeedImgSource={profileFeedImgSource}
                     userName={user_name}
-                />
+                /> */}
             </ScrollView>
         </>
     );

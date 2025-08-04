@@ -42,12 +42,13 @@ export default function PreferencesScreen() {
 
     // Send preferences to your backend
     try {
+      console.log('Calling API:', `${BASE_URL}/api/user/preferences`);
       const response = await fetch(`${BASE_URL}/api/user/preferences`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: userId, // Using Clerk's user ID
-          preferences: allPreferences,
+          'userId': userId, // Using Clerk's user ID
+          'preferences': allPreferences,
         }),
       });
 

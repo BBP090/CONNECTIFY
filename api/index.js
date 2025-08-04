@@ -321,29 +321,49 @@ app.delete("/delete_chat/:chatId", (req, res) => {
 
 // API endpoint to handle user preferences
 app.post("/api/user/preferences", (req, res) => {
-  const { userId, email, preferences } = req.body;
+  const { userId, preferences } = req.body;
+
+  const values = preferences.map((element) => [userId, element]);
 
   if (!userId || !preferences) {
     return res.status(400).json({ error: "User ID and preferences are required." });
   }
 
   // Insert preferences into the preferences table
-  const query = "INSERT INTO preferences (user_id, preference) VALUES (?, ?)";
-  db.query(query, [userId, JSON.stringify(preferences)], (err, result) => {
+  const query = "INSERT INTO preferences (user_id, preference) VALUES ?";
+  db.query(query, [values], (err, result) => {
     if (err) {
       console.error("Error inserting preferences:", err);
       return res.status(500).json({ error: "Failed to save preferences" });
     }
     res.status(200).json({ success: true, message: "Preferences saved successfully" });
+    console.log(result);
   });
 });
 
 app.get("/api/get-userProfile", (req, res) => {
   const userId = req.query.userId;
+
   if (!userId) {
     return res.status(400).json({ error: 'UserId not provided.' });
   }
-  const retrieveUserQuery = `SELECT u.id AS userId, u.name, p.preference FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN ( SELECT preference FROM preferences WHERE user_id = ?) AND u.id != ?;`
+  const retrieveUserQuery = `SELECT 
+  u.id AS userId, 
+  u.name, 
+  p.preference 
+FROM 
+  preferences p 
+JOIN 
+  users u ON p.user_id = u.id 
+WHERE 
+  (
+    p.preference IN (
+      SELECT preference 
+      FROM preferences 
+      WHERE user_id = ?
+      )
+  )
+  AND u.id != ?;`
   db.query(retrieveUserQuery, [userId, userId], (err, result) => {
     if (err) {
       console.error('error:', err);
@@ -357,6 +377,37 @@ app.get("/api/get-userProfile", (req, res) => {
     } else {
       console.log("User Profiles Retrieved:", result);
       res.status(200).json({ message: 'User Profiles Retrieved', result });
+    }
+  });
+});
+
+app.get('/api/get-user-profile-by-tags', (req, res) => {
+  const userId = req.query.userId;
+  let tags = req.query.tags;
+
+  console.log(tags);
+
+  // If it's a string (e.g., "coding" or "coding,reading")
+  if (typeof tags === 'string') {
+    tags = tags?.split(',')?.map(tag => tag.trim());
+  }
+
+  const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
+  const retrieveUserByTagsQuery = `SELECT u.id AS userId, u.name, p.preference FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
+
+  db.query(retrieveUserByTagsQuery, [...tags, userId], (err, result1) => {
+    if (err) {
+      console.error('error:', err);
+      return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+    }
+
+    console.log("Query results:", result1.length, "users profiles found");
+
+    if (result1.length === 0) {
+      return res.status(200).json({ message: 'No user profiles matching the preferences' })
+    } else {
+      console.log("User Profiles Retrieved:", result1);
+      res.status(200).json({ message: 'User Profiles Retrieved', result1 });
     }
   });
 });
