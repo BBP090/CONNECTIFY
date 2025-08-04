@@ -74,18 +74,22 @@ export default function SignUpScreen() {
 
       // if the verification process is completed set user to active and redirect to another page
       if (signUpAttempt.status === "complete") {
+        // ✅ Send user email to backend MySQL
+        // const response = await fetch(`${BASE_URL}/api/add-user`, {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ email: emailAddress }),
+        // });
+
+        // if (!response.ok) {
+        //   console.log("API call failed!!");
+        // }
+
         await setActive({ session: signUpAttempt.createdSessionId });
 
-      // ✅ Send user email to backend MySQL
-      await fetch(`${BASE_URL}/api/add-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: emailAddress }),
-      });
-      
-        router.replace('/set_preferences');
+        router.replace('/');
       }
       else {
         // if the status is not 'complete' then check why
@@ -138,7 +142,7 @@ export default function SignUpScreen() {
             renderItem={(item) => {
               { console.log(item.item.longMessage); }
               return (
-                <View key={item.item.code} style={{flexDirection: 'row', padding: 6}}>
+                <View key={item.item.code} style={{ flexDirection: 'row', padding: 6 }}>
                   <MaterialIcons name='error-outline' size={23} color='red' />
                   <Text style={styles.errorMsg}>{item.item.longMessage}</Text>
                 </View>

@@ -1,36 +1,143 @@
-import { Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, Button } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+//import axios from 'axios';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BASE_URL } from "../../config/config";
+import useGetUserID from "../hooks/useGetUserID";
+import { router } from 'expo-router';
 
-const ProfilePage = () => {
-  const router = useRouter();
+
+
+
+const ProfilePage = ()=>{
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [uploadedUrl, setUploadedUrl] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const {userId} = useGetUserID();
+  
 
+  console.log("USER ID IS   ",userId);
   const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // if (!permissionResult.granted) return alert('Permission required!');
 
-    if (!permissionResult.granted) {
-      alert('Permission to access media is required!');
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    console.log(`resultAA = ${result}`)
+    console.log(`${result.assets[0].uri}`)
+    const uri = result.assets[0].uri;
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setSelectedImage(uri);
+      setModalVisible(false);
+      console.log("Result is", JSON.stringify(result, null, 2));
+      await uploadImage(uri);
+    }
+    else{
+      console.log("No U!resultcancelled");
+    }
+  };
+
+  const uploadImage = async (uri) => {
+    const formData = new FormData();
+      formData.append("pfp", {
+    uri: uri,
+    name: "upload.jpg",           // any name with valid extension
+    type: "image/jpeg",           // or image/png etc.
+  });
+
+  formData.append("userId", userId);
+
+     try {
+    const res = await fetch(`${BASE_URL}/upload-pfp`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    const text = await res.text(); // 🔄 Try text first
+    if (!res.ok) {
+      console.error("❌ Upload failed:", text);
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.6, // compression
+    const data = JSON.parse(text); // ✅ now safe to parse
+    console.log("✅ Upload success:", data);
+     // ✅ Immediately update UI
+    // setUploadedUrl(`${BASE_URL}/uploads/${data.filename}`);
+  } catch (error) {
+    console.error("❌ Upload error:", error);
+  }
+
+};
+
+const handleAddPhoto = async () => {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images', 'videos'],
+    allowsEditing: true,
+    quality: 0.8,
+  });
+
+  if (!result.canceled && result.assets?.length > 0) {
+    const uri = result.assets[0].uri;
+    const formData = new FormData();
+
+    formData.append("image", {
+      uri,
+      name: "photo.jpg",
+      type: "image/jpeg"
+    });
+    formData.append("userId", userId);
+
+    const res = await fetch(`${BASE_URL}/upload-photo`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setSelectedImage(uri);
-      setModalVisible(false);
+    const data = await res.json();
+    console.log("Photo uploaded:", data);
+    fetchUserPhotos(); // refresh UI
+  }
+};
 
-      // 🔁 Optionally: upload here
-      // await uploadImage(uri);
+const fetchUserPhotos = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/user-photos/${userId}`);
+    const data = await res.json();
+    setPhotos(data.map(item => `${BASE_URL}/${item.image_path}`));
+  } catch (error) {
+    console.error("Failed to fetch photos", error);
+  }
+};
+useEffect(() => {
+  if (userId) fetchUserPhotos();
+}, [userId]);
+
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/user/${userId}`);
+      const data = await res.json();
+
+      if (data.profile_image) {
+        setUploadedUrl(`${BASE_URL}${data.profile_image}`);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
+
+  if (userId) fetchUserData();
+}, [userId]);
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,9 +150,15 @@ const ProfilePage = () => {
         {/* 🖼️ Profile Image */}
         <View style={styles.profileCircle}>
           <Image
-            style={styles.profileImage}
-            source={selectedImage ? { uri: selectedImage } : require("../../assets/images/pfp.png")}
-          />
+        source={
+          uploadedUrl
+            ? { uri: uploadedUrl }
+            : selectedImage
+            ? { uri: selectedImage }
+            : require('../../assets/images/pfp.png')
+        }
+        style={styles.profileImage}
+      />
         </View>
 
         {/* 🔘 Edit Profile */}
@@ -63,22 +176,21 @@ const ProfilePage = () => {
       {/* Photos tab */}
       <View style={styles.photosTab}>
         <Text style={styles.photosTabText}>Photos</Text>
+        <TouchableOpacity onPress={handleAddPhoto}>
+          <Text style={styles.addPhotoButton}>＋</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.photoGrid}>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji1.png")} />
-        </View>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji2.png")} />
-        </View>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../../assets/images/emoji3.png")} />
-        </View>
+          {photos.map((uri, idx) => (
+            <View key={idx} style={styles.photoBox}>
+              <Image source={{ uri }} style={styles.photos} />
+            </View>
+          ))}
       </View>
 
       {/* 🔳 Popup Modal */}
-      <Modal
+       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -164,7 +276,7 @@ const styles = StyleSheet.create({
   },
   photosTab: {
     // backgroundColor:"#28a745",
-    width: '20%',
+    width: '40%',
     alignItems: 'center',
     marginBottom: 10,
     borderBottomColor: '#000',
@@ -183,18 +295,25 @@ const styles = StyleSheet.create({
   },
   photoGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',           // ✅ allows wrapping
+    justifyContent: 'flex-start',
     width: '100%',
     paddingHorizontal: 20,
-  },
+    gap: 10,                     // ✅ spacing between boxes
+},
   photoBox: {
-    width: 130,
-    height: 150,
-  },
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ccc',
+},
   photos: {
-    width: 130,
-    height: 150,
-  },
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+},
   modalBackground: {
   flex: 1,
   justifyContent: 'center',
@@ -225,7 +344,11 @@ sideButton: {
   maxWidth: 80,
   textAlign: 'center',
 },
-
+    addPhotoButton: {
+      fontSize: 24,
+      marginLeft: 10,
+      color: '#28a745',
+    },
 });
 
 export default ProfilePage;

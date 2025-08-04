@@ -42,7 +42,15 @@ CREATE TABLE IF NOT EXISTS users (
 );
 alter table ongoing_chats add column last_message1 int;
 alter table ongoing_chats add column last_message2 int;
-ALTER TABLE users MODIFY name VARCHAR(255) NULL;`;
+ALTER TABLE users MODIFY name VARCHAR(255) NULL;
+
+CREATE TABLE IF NOT EXISTS user_photos (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT,
+  image_path VARCHAR(255),
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);`;
 
  const db = mysql.createPool({
      host: process.env.DB_HOST,

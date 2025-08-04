@@ -380,7 +380,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.post('/upload-image', upload.single('image'), (req, res) => {
+app.post('/upload-pfp', upload.single('pfp'), (req, res) => {
   const userId = req.body.userId;
   const file = req.file;
 
@@ -423,5 +423,39 @@ app.get('/user/:id', (req, res) => {
     if (results.length === 0) return res.status(404).json({ error: "User not found" });
 
     return res.status(200).json(results[0]);
+  });
+});
+
+//Multiphoto upload
+app.post('/upload-photo', upload.single('image'), (req, res) => {
+  const { userId } = req.body;
+
+  if (!req.file || !userId) {
+    return res.status(400).json({ error: 'Missing file or userId' });
+  }
+
+  const imagePath = `uploads/${req.file.filename}`;
+  const sql = `INSERT INTO user_photos (user_id, image_path) VALUES (?, ?)`;
+
+  db.query(sql, [userId, imagePath], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+
+    return res.status(200).json({
+      message: 'Photo uploaded',
+      imagePath: imagePath,
+    });
+  });
+});
+
+//Retrieve Photo
+app.get('/user-photos/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const sql = `SELECT image_path FROM user_photos WHERE user_id = ?`;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+
+    res.status(200).json(results);
   });
 });
