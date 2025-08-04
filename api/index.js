@@ -1,7 +1,9 @@
+const {BASE_URL} = require("../config/config");
 const express = require("express");
 const bodyParser = require("body-parser");
 const db = require('./database');
-
+const path = require('path');
+const multer = require("multer");
 const http = require("http");
 const socketIo = require("socket.io");
 const app = express();
@@ -21,6 +23,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Listen for connection
 io.on("connection", (socket) => {
@@ -360,5 +363,33 @@ app.post('/get-user-by-id', (req, res) => {
     }
 
     return res.status(200).json(results[0]);
+  });
+});
+
+
+//Disk Storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Ensure this folder exists in the root
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage });
+
+app.post('/upload-image', upload.single('image'), (req, res) => {
+
+  console.log(`file is : ${req.file}`);
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  res.status(200).json({
+    message: 'Image uploaded successfully',
+    filename: req.file.filename,
+    url: `${BASE_URL}/uploads/${req.file.filename}`,
   });
 });
