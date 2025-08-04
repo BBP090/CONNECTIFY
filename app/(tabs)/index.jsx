@@ -14,10 +14,20 @@ const profileFeedImgSource = require("../../assets/images/background.png");
 const user_name = "Bishist Bikram Pant"
 
 export default function Home() {
-    const { isSignedIn } = useAuth();
     // const { user } = useUser();
+    const [users, setUsers] = useState([]);
+    const tags = ["Music", "Sports", "Games", "Coding", "Tech", "Art", "Photography", "Movies", "Fitness", "Travel", "Books", "Fashion", "Food", "Nature", "Anime", "Design"];
+    const [selectedTags, setSelectedTags] = useState([]);
     const { userId } = useGetUserID();
+    const { isSignedIn } = useAuth();
 
+
+    // console log to check sign in state and users retrieved
+    console.log(isSignedIn);
+    console.log('users:', users);
+    console.log('selected tags:', selectedTags);
+
+    // to retrieve user profile
     useEffect(() => {
         if (!userId) return;
         const retrieveUser = async () => {
@@ -37,6 +47,7 @@ export default function Home() {
                 console.log('Response status:', response.status);
                 const data = await response.json();
                 console.log('Response data:', data);
+                setUsers(data.result);
 
                 if (!response.ok) {
                     console.log("API call failed", response.ok);
@@ -48,7 +59,15 @@ export default function Home() {
         retrieveUser();
     }, [userId]);
 
-    console.log(isSignedIn);
+    const issSelected = (item) => (selectedTags.includes(item));
+
+    const checker = (isSelected, item) => {
+        if (isSelected) {
+            setSelectedTags(selectedTags.filter((currentValue) => currentValue != item));
+        } else {
+            setSelectedTags([...selectedTags, item]);
+        }
+    };
 
     const [fontsLoaded] = useFonts({
         Poppins_600SemiBold,
@@ -64,7 +83,7 @@ export default function Home() {
     return (
         <>
             <View style={styles.tagsContainer}>
-                <FeedTags />
+                <FeedTags tags={tags} checker={checker} issSelected={issSelected} />
             </View>
             <ScrollView
                 contentContainerStyle={Platform.OS === "web" && { alignItems: "center" }}
