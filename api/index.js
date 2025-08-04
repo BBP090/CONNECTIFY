@@ -320,3 +320,49 @@ app.delete("/delete_chat/:chatId", (req, res) => {
     res.sendStatus(200);
   });
 });
+
+// map based searching
+// Set user location
+app.post('/set_location', (req, res) => {
+  const { userId, latitude, longitude } = req.body;
+  db.query(`
+    Update users set latitude=?, longitude=? where id=?
+    `, [latitude, longitude, userId], (err)=>{
+       if (err) return res.status(500).send("Failed");
+    res.sendStatus(200);
+    })
+})
+
+// Get nearby users
+// Get users sorted by proximity to current user
+app.get('/nearby_users', (req, res) => {
+  const { userId } = req.query;
+
+  const getUserLocation = `
+    SELECT latitude, longitude FROM users WHERE id = ? LIMIT 1;
+  `;
+
+  db.query(getUserLocation, [userId], (err, results) => {
+    if (err || results.length === 0) return res.status(500).send("Failed to get user location");
+    
+    const { latitude, longitude } = results[0];
+
+    const nearbyUsersQuery = `
+      SELECT id, name, latitude, longitude,
+        (6371 * acos(
+          cos(radians(?)) * cos(radians(latitude)) *
+          cos(radians(longitude) - radians(?)) +
+          sin(radians(?)) * sin(radians(latitude))
+        )) AS distance
+      FROM users
+      WHERE id != ?
+      ORDER BY distance ASC
+      LIMIT 20
+    `;
+
+    db.query(nearbyUsersQuery, [latitude, longitude, latitude, userId], (err2, users) => {
+      if (err2) return res.status(500).send("Error retrieving nearby users");
+      res.json(users);
+    });
+  });
+});

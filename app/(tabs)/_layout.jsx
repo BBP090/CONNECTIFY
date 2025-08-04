@@ -37,6 +37,12 @@ export default function TabsLayout() {
                             tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? "chatbubble-sharp" : "chatbubble-outline"} color={color} size={20} />
                         }} />
                     <Tabs.Screen
+                    name="Search" options={{
+                        headerTitle: "Search",
+                                                    tabBarIcon: ({ focused, color }) => <Ionicons name={focused ? "chatbubble-sharp" : "chatbubble-outline"} color={color} size={20} />
+
+                    }}/>
+                    <Tabs.Screen
                         name="profile"
                         options={{
                             headerTitle: 'Profile',
