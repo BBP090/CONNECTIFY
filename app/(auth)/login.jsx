@@ -1,9 +1,6 @@
 import { useAuth, useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useAuth, useSignIn } from '@clerk/clerk-expo';
-import { Ionicons } from '@expo/vector-icons';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -46,8 +43,8 @@ export default function LoginScreen() {
 
         try {
           const token = await getToken();
-          console.log('🔑 Token present:', !!token);
-          console.log('🌐 Calling API:', `${BASE_URL}/api/add-user`);
+          console.log('Token present:', !!token);
+          console.log('Calling API:', `${BASE_URL}/api/add-user`);
           // ✅ Send user email to backend MySQL
           const response = await fetch(`${BASE_URL}/api/add-user`, {
             method: 'POST',

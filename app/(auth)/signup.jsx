@@ -1,11 +1,9 @@
-import { useSignUp } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import VerificationScreen from '../../components/VerificationScreen';
 
 export default function SignUpScreen() {
@@ -108,6 +106,7 @@ export default function SignUpScreen() {
         <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
           autoCapitalize='none'
+          autoFocus={true}
           placeholder="Enter your email"
           style={styles.input}
           value={emailAddress}

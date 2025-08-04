@@ -23,11 +23,12 @@ export default function PreferencesScreen() {
   const { userId, email } = useGetUserID();  // Get the userId from Clerk's session
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const [otherPreference, setOtherPreference] = useState("");
+  console.log(selectedPreferences);
 
   // Handle preferences change
-  const togglePreference = (item) => {
-    if (selectedPreferences.includes(item)) {
-      setSelectedPreferences(selectedPreferences.filter((i) => i !== item));
+  const togglePreference = (item, isSelected) => {
+    if (isSelected) {
+      setSelectedPreferences(selectedPreferences.filter((currentValue) => currentValue != item));
     } else {
       setSelectedPreferences([...selectedPreferences, item]);
     }
@@ -53,7 +54,7 @@ export default function PreferencesScreen() {
       const data = await response.json();
       console.log("Preferences saved:", data);
       if (data.success) {
-      router.replace('/');// Redirect to the homepage after saving preferences
+        router.replace('/');// Redirect to the homepage after saving preferences
       }
     } catch (error) {
       console.error("Error saving preferences:", error);
@@ -66,28 +67,32 @@ export default function PreferencesScreen() {
 
       <View style={styles.preferenceGrid}>
         {/* Display list of preferences */}
-        {preferencesList.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.preferenceItem,
-              selectedPreferences.includes(item) && styles.selectedItem,
-            ]}
-            onPress={() => togglePreference(item)}
-          >
-            <Text
+        {preferencesList.map((item) => {
+          const isSelected = selectedPreferences.includes(item);
+          return (
+            <TouchableOpacity
+              key={item}
               style={[
-                styles.preferenceText,
-                selectedPreferences.includes(item) && styles.selectedText,
+                styles.preferenceItem,
+                (isSelected) && styles.selectedItem,
               ]}
+              onPress={() => togglePreference(item, isSelected)}
             >
-              {item}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.preferenceText,
+                  (isSelected) && styles.selectedText,
+                ]}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )
+        })}
       </View>
 
       <TextInput
+        autoFocus={true}
         style={styles.input}
         placeholder="Other interests..."
         value={otherPreference}

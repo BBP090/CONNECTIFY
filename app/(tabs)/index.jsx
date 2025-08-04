@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
 import UserProfileFeed from '../../components/UserProfileFeed';
 import FeedTags from '../../components/FeedTags';
-import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-expo';
 import useGetUserID from '../hooks/useGetUserID';
+import { BASE_URL } from "../../config/config"; // adjust the path as needed
 
 // const placeHolderImage = require("../../assets/image/background.png");
 const smallImgSource = require("../../assets/images/background.png");
@@ -13,9 +14,39 @@ const profileFeedImgSource = require("../../assets/images/background.png");
 const user_name = "Bishist Bikram Pant"
 
 export default function Home() {
-    const { isSignedIn, getToken } = useAuth();
-    const { user } = useUser();
-    const {userId, emailAddress} = useGetUserID();
+    const { isSignedIn } = useAuth();
+    // const { user } = useUser();
+    const { userId } = useGetUserID();
+
+    useEffect(() => {
+        if (!userId) return;
+        const retrieveUser = async () => {
+            try {
+                // const token = await getToken();
+                // console.log('Token present:', !!token);
+                console.log('Calling API:', `${BASE_URL}/api/get-userProfile?userId=${userId}`);
+                // ✅ Send user email to backend MySQL
+                const response = await fetch(`${BASE_URL}/api/get-userProfile?userId=${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (!response.ok) {
+                    console.log("API call failed", response.ok);
+                }
+            } catch (error) {
+                console.error("Error retrieving users:", error);
+            }
+        }
+        retrieveUser();
+    }, [userId]);
 
     console.log(isSignedIn);
 
@@ -28,6 +59,7 @@ export default function Home() {
     if (!fontsLoaded) {
         return null;
     }
+
 
     return (
         <>

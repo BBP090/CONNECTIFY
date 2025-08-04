@@ -337,3 +337,26 @@ app.post("/api/user/preferences", (req, res) => {
     res.status(200).json({ success: true, message: "Preferences saved successfully" });
   });
 });
+
+app.get("/api/get-userProfile", (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ error: 'UserId not provided.' });
+  }
+  const retrieveUserQuery = `SELECT u.id AS userId, u.name, p.preference FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN ( SELECT preference FROM preferences WHERE user_id = ?) AND u.id != ?;`
+  db.query(retrieveUserQuery, [userId, userId], (err, result) => {
+    if (err) {
+      console.error('error:', err);
+      return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+    }
+
+    console.log("Query results:", result.length, "users profiles found");
+
+    if (result.length === 0) {
+      return res.status(200).json({ message: 'No user profiles matching the preferences' })
+    } else {
+      console.log("User Profiles Retrieved:", result);
+      res.status(200).json({ message: 'User Profiles Retrieved', result });
+    }
+  });
+});

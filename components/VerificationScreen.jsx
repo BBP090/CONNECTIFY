@@ -29,11 +29,12 @@ const VerificationScreen = ({emailAddress}) => {
             // attempt for verification with the code provided by the user against the code sent
             const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
             // returns object with current signUp status, sessionid
-
+            
             // if the verification process is completed set user to active and redirect to another page
             if (signUpAttempt.status === "complete") {
                 await setActive({ session: signUpAttempt.createdSessionId });
                 console.log("signup successful");
+                router.replace('/set_preferences');
                 await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
                 try {
@@ -62,7 +63,6 @@ const VerificationScreen = ({emailAddress}) => {
                 }
 
 
-                router.replace('/');
             }
             else {
                 // if the status is not 'complete' then check why
@@ -108,6 +108,7 @@ const VerificationScreen = ({emailAddress}) => {
                         keyboardType="number-pad"
                         autoCapitalize="none"
                         autoCorrect={false}
+                        autoFocus={true}
                     // editable={!loading}
                     />
 
