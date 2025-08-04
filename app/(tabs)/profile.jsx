@@ -1,10 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 //import axios from 'axios';
+import { router } from 'expo-router';
 import { Button, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BASE_URL } from "../../config/config";
 import useGetUserID from "../hooks/useGetUserID";
-import { router } from 'expo-router';
 
 
 
@@ -15,7 +15,7 @@ const ProfilePage = ()=>{
   const [uploadedUrl, setUploadedUrl] = useState(null);
   const [photos, setPhotos] = useState([]);
   const {userId} = useGetUserID();
-  
+  const [userName, setUserName] = useState('');
 
   console.log("USER ID IS   ",userId);
   const handlePickImage = async () => {
@@ -130,6 +130,10 @@ useEffect(() => {
       if (data.profile_image) {
         setUploadedUrl(`${BASE_URL}${data.profile_image}`);
       }
+      console.log(data.Name);
+      if (data.Name) {
+         setUserName(data.Name);  // Use exact column name from SQL
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -167,7 +171,7 @@ useEffect(() => {
         </TouchableOpacity>
       </View>
       {/* Username and rest */}
-      <Text style={styles.username}>Username</Text>
+      <Text style={styles.username}>{userName}</Text>
 
       <View style={styles.bioContainer}>
         <Text>Bio here</Text>
