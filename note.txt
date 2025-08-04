@@ -1,0 +1,45 @@
+app:
+Contains the app's navigation, which is file-based. The file structure of the app directory determines the app's navigation.
+The app has two routes defined by two files: app/(tabs)/index.tsx and app/(tabs)/explore.tsx. The layout file in app/(tabs)/_layout.tsx sets up the tab navigator.
+
+assets:
+The assets directory contains adaptive-icon.png used for Android and an icon.png used for iOS as app icons. It also contains splash.png which is an image for the project's splash screen and a favicon.png if the app runs in a browser.
+
+components:
+Contains React Native components, like ThemedText.tsx, which creates text elements that use the app's color scheme in light and dark modes.
+
+constants:
+Contains Colors.ts, which contains a list of color values throughout the app.
+
+hooks:
+Contains React Hooks, which allows sharing common behavior between components. For example, useThemeColor() is a hook that returns a color based on the current theme.
+
+scripts:
+Contains reset-project.js, which can be run with npm run reset-project. This script will move the app directory to app-example, and create a new app directory with an index.tsx file.
+
+app.json:
+Contains configuration options for the project and is called the app config. These options change the behavior of your project while developing, building, submitting, and updating your app.
+
+package.json:
+The package.json file contains the project's dependencies, scripts, and metadata. Anytime a new dependency is added to your project, it will be added to this file.
+
+Features
+The default project template has the following features:
+
+1. File-based routing:
+The app has two screens: app/(tabs)/index.tsx and app/(tabs)/explore.tsx. The layout file in app/(tabs)/_layout.tsx sets up the tab navigator.
+
+2. Android, iOS, and web support
+You can open this project on Android, iOS, and the web. To open the web version, press w in the terminal after running the project.
+
+3. Images
+For static images, you can use the @2x and @3x suffixes to provide images for different screen densities.
+
+4. Custom fonts
+Open app/_layout.tsx to see how to load custom fonts.
+
+5. Light and dark modes
+This template has light and dark mode support. The useColorScheme() hook lets you inspect the user's current color scheme, so that you can adjust UI colors accordingly.
+
+6. Animations
+The components/HelloWave.tsx component uses the Animated API to create a waving hand animation. On iOS, the components/ParallaxScrollView.tsx creates a parallax effect for the header image.
