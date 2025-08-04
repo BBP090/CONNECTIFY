@@ -12,11 +12,11 @@ import { BASE_URL } from "../../config/config"; // adjust the path as needed
 const smallImgSource = require("../../assets/images/background.png");
 const profileFeedImgSource = require("../../assets/images/background.png");
 const user_name = "Bishist Bikram Pant"
+// const tags = ["Music", "Sports", "Games", "Coding", "Tech", "Art", "Photography", "Movies", "Fitness", "Travel", "Books", "Fashion", "Food", "Nature", "Anime", "Design"];
 
 export default function Home() {
-    // const { user } = useUser();
     const [users, setUsers] = useState([]);
-    const tags = ["Music", "Sports", "Games", "Coding", "Tech", "Art", "Photography", "Movies", "Fitness", "Travel", "Books", "Fashion", "Food", "Nature", "Anime", "Design"];
+    const [tags, setTags] = useState([]);
     const [selectedTags, setSelectedTags] = useState([]);
     const { userId } = useGetUserID();
     const { isSignedIn } = useAuth();
@@ -28,21 +28,11 @@ export default function Home() {
     console.log('users:', users);
     console.log('selected tags:', selectedTags);
 
-    // to retrieve user profile
     useEffect(() => {
-        if (!userId) return;
-        const retrieveUser = async () => {
+        const retrieveTags = async () => {
             try {
-                // const token = await getToken();
-                // console.log('Token present:', !!token);
-
-                // const params = new URLSearchParams();
-                // params.append('userId', userId);
-                // selectedTags.forEach(tag => params.append('tags', tag));
-
-                console.log('Calling API:', `${BASE_URL}/api/get-userProfile?userId=${userId}`);
-                // ✅ Send user email to backend MySQL
-                const response = await fetch(`${BASE_URL}/api/get-userProfile?userId=${userId}`, {
+                console.log('Calling API to retrieve tags:', `${BASE_URL}/api/get-tags`);
+                const response = await fetch(`${BASE_URL}/api/get-tags`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -50,9 +40,40 @@ export default function Home() {
                     },
                 });
 
+                const data = await response.json();
+                console.log('tags:', data);
+                setTags(data.arrayOfTags);
+
+            } catch (err) {
+                console.error('Error fetching tags:', err);
+            }
+        };
+
+        retrieveTags();
+    }, []);
+
+    // to retrieve user profile
+    useEffect(() => {
+        if (!userId) return;
+        const retrieveUser = async () => {
+            try {
+                console.log('Calling API:', `${BASE_URL}/api/get-user-profile`);
+                // ✅ Send user email to backend MySQL
+                const response = await fetch(`${BASE_URL}/api/get-user-profile`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        tags: selectedTags
+                    })
+                });
+
                 console.log('Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
+
                 setUsers(data.result);
 
                 if (!response.ok) {
@@ -64,38 +85,7 @@ export default function Home() {
         }
         retrieveUser();
 
-        // to filter users by tags
-        const retrieveUserByTags = async () => {
-            if (!userId) return;
-
-            console.log('tags', selectedTags);
-            try {
-                const params = new URLSearchParams();
-                params.append('userId', userId);
-                selectedTags.forEach(tag => params.append('tags', tag));
-
-                console.log('Calling API to retreive users by tags', `${BASE_URL}/api/get-user-profile-by-tags?${params.toString()}`);
-
-                const response1 = await fetch(`${BASE_URL}/api/get-user-profile-by-tags?${params.toString()}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                const data1 = await response1.json();
-                console.log('users by tags:', data1.result1);
-                setUsers(users.concat(data1.result1));
-            } catch (err) {
-                console.error('Error retrieving users by tags:', err);
-            }
-        }
-
-        if (selectedTags)
-            retrieveUserByTags();
-
     }, [userId, selectedTags]);
-
 
     const issSelected = (item) => (selectedTags.includes(item));
 
@@ -127,31 +117,18 @@ export default function Home() {
                 contentContainerStyle={Platform.OS === "web" && { alignItems: "center" }}
             >
                 {
-                    users && users.map((user) => {
+                    users?.length ? users.map((user) => {
+                        console.log(user.userId)
                         return (
                             <UserProfileFeed
+                                key={user.userId}
                                 smallImgSource={smallImgSource}
                                 profileFeedImgSource={profileFeedImgSource}
                                 userName={user.userId}
                             />
                         )
-                    })
+                    }) : null
                 }
-                {/* <UserProfileFeed
-                    smallImgSource={smallImgSource}
-                    profileFeedImgSource={profileFeedImgSource}
-                    userName={user_name}
-                />
-                <UserProfileFeed
-                    smallImgSource={smallImgSource}
-                    profileFeedImgSource={profileFeedImgSource}
-                    userName={user_name}
-                />
-                <UserProfileFeed
-                    smallImgSource={smallImgSource}
-                    profileFeedImgSource={profileFeedImgSource}
-                    userName={user_name}
-                /> */}
             </ScrollView>
         </>
     );

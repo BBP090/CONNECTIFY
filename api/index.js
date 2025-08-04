@@ -341,17 +341,41 @@ app.post("/api/user/preferences", (req, res) => {
   });
 });
 
-app.get("/api/get-userProfile", (req, res) => {
-  const userId = req.query.userId;
 
-  if (!userId) {
-    return res.status(400).json({ error: 'UserId not provided.' });
-  }
-  const retrieveUserQuery = `SELECT 
+app.post('/api/get-user-profile', (req, res) => {
+  const userId = req.body.userId;
+  const tags = req.body.tags;
+
+  console.log('tags:', tags);
+
+  if (!userId && !tags)
+    return res.status(500).jsom({ error: 'userId and Tags are required!!!!' });
+
+  if (tags && tags.length) {
+    const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
+    const retrieveUserQuery = `SELECT DISTINCT u.id AS userId, u.email FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
+
+    db.query(retrieveUserQuery, [...tags, userId], (err, result) => {
+      if (err) {
+        console.error('error:', err);
+        return res.status(500).json({ error: 'Failed to retrieve user profile by tags.' });
+      }
+
+      console.log("Query results:", result.length, "users profiles that match the tag found.");
+
+      if (result.length === 0) {
+        return res.status(200).json({ message: 'No user profiles matching the tags.' })
+      } else {
+        console.log("User profiles retrieved matching the tags:", result);
+        res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
+      }
+    });
+  } else {
+    const retrieveAll = `SELECT * FROM users;`
+    const retrieveUserQuery = `SELECT DISTINCT
   u.id AS userId, 
-  u.name, 
-  p.preference 
-FROM 
+  u.email
+FROM
   preferences p 
 JOIN 
   users u ON p.user_id = u.id 
@@ -364,50 +388,42 @@ WHERE
       )
   )
   AND u.id != ?;`
-  db.query(retrieveUserQuery, [userId, userId], (err, result) => {
-    if (err) {
-      console.error('error:', err);
-      return res.status(500).json({ error: 'Failed to retrieve user profile.' });
-    }
+    db.query(retrieveUserQuery, [userId, userId], (err, result) => {
+      if (err) {
+        console.error('error:', err);
+        return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+      }
 
-    console.log("Query results:", result.length, "users profiles found");
+      console.log("Query results:", result.length, "users profiles found");
 
-    if (result.length === 0) {
-      return res.status(200).json({ message: 'No user profiles matching the preferences' })
-    } else {
-      console.log("User Profiles Retrieved:", result);
-      res.status(200).json({ message: 'User Profiles Retrieved', result });
-    }
-  });
-});
+      if (result.length === 0) {
+        db.query(retrieveAll, (err, result) => {
+          if (err) {
+            console.error('error:', err);
+            return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+          }
+          console.log("Query results:", result.length, "users profiles found");
+          return res.status(200).json({ message: 'All users profiles retrieved', result })
+        })
 
-app.get('/api/get-user-profile-by-tags', (req, res) => {
-  const userId = req.query.userId;
-  let tags = req.query.tags;
-
-  console.log(tags);
-
-  // If it's a string (e.g., "coding" or "coding,reading")
-  if (typeof tags === 'string') {
-    tags = tags?.split(',')?.map(tag => tag.trim());
+      } else {
+        console.log("User Profiles Retrieved:", result);
+        res.status(200).json({ message: 'User Profiles Retrieved', result });
+      }
+    });
   }
-
-  const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
-  const retrieveUserByTagsQuery = `SELECT u.id AS userId, u.name, p.preference FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
-
-  db.query(retrieveUserByTagsQuery, [...tags, userId], (err, result1) => {
-    if (err) {
-      console.error('error:', err);
-      return res.status(500).json({ error: 'Failed to retrieve user profile.' });
-    }
-
-    console.log("Query results:", result1.length, "users profiles found");
-
-    if (result1.length === 0) {
-      return res.status(200).json({ message: 'No user profiles matching the preferences' })
-    } else {
-      console.log("User Profiles Retrieved:", result1);
-      res.status(200).json({ message: 'User Profiles Retrieved', result1 });
-    }
-  });
 });
+
+app.get('/api/get-tags', (req, res) => {
+  const retrieveTags = `SELECT DISTINCT preference from preferences;`;
+  db.query(retrieveTags, (err, result) => {
+    if (err) {
+      console.error('failed to retrieve tags:', err);
+      return res.status(500).json({ error: 'Failed to retrieve tags.' });
+    }
+
+    console.log('Retrieved tags:', result);
+    const arrayOfTags = result.map((item) => item.preference)
+    return res.status(200).json({ message: 'Tags Retrieved', arrayOfTags });
+  })
+})

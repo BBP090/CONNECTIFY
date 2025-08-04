@@ -44,8 +44,6 @@ CREATE TABLE IF NOT EXISTS preferences (
 );
 
 ALTER TABLE users MODIFY name VARCHAR(255) NULL;
-
-
 `;
  
 //// ALTER TABLE users ADD email VARCHAR(255) NULL;
