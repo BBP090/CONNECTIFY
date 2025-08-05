@@ -136,6 +136,8 @@ export default function Home() {
                         console.log(user.userId)
                         return (
                             <UserProfileFeed
+                                sentBy={userId}
+                                sentTo={user.userId}
                                 key={user.userId}
                                 smallImgSource={smallImgSource}
                                 profileFeedImgSource={profileFeedImgSource}

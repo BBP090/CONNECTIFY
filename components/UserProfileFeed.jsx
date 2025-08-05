@@ -3,11 +3,46 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import RequestButton from './RequestButton';
+import { BASE_URL } from "../config/config"; // adjust the path as needed
 
 // const placeHolderImage = require("../../assets/images/background.png");
 
-export default function UserProfileFeed({ smallImgSource, userName, profileFeedImgSource }) {
+export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userName, profileFeedImgSource }) {
+
     const [status, setStatus] = useState(null);
+
+    const sendRequest = async () => {
+        try {
+            console.log('Calling API:', `${BASE_URL}/requests/send`);
+            // Send user email to backend MySQL
+            const response = await fetch(`${BASE_URL}/requests/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    from_user_id: sentBy,
+                    to_user_id: sentTo,
+                })
+            });
+
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('request sent:', data);
+
+            if (data.success)
+                setStatus(true);
+
+            if (!response.ok) {
+                console.log("API call failed", response.ok);
+            }
+        } catch (error) {
+            console.error("Error sending request:", error);
+            setStatus(false);
+        }
+    }
+
 
     if (status === null) {
         console.log(status);
@@ -28,9 +63,39 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
                         </View>
                         <View style={styles.buttonContainer}>
-                            <RequestButton onPress={() => { setStatus(true) }} iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
+                            <RequestButton onPress={() => {
+                                sendRequest();
+                            }}
+                                iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                         </View>
                     </View >
+                </LinearGradient>
+                <View style={{ padding: 5 }}>
+                </View>
+            </>
+        );
+    } else if (status === true) {
+        console.log(status);
+        return (
+            <>
+                <LinearGradient
+                    colors={["#008000", "#b2f7b2"]}
+                    style={styles.border}
+                >
+                    <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
+                        <View style={styles.profileTitleContainer}>
+                            <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
+                            <View style={styles.profileUserNameContainer}>
+                                <Text style={[styles.profileUserName]}>{userName}</Text>
+                            </View>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
+                        </View>
+                        <View style={styles.buttonContainer}>
+                            <RequestButton iconName="check-circle" label="Request Sent!" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
+                        </View>
+                    </View>
                 </LinearGradient>
                 <View style={{ padding: 5 }}>
                 </View>
@@ -55,7 +120,7 @@ export default function UserProfileFeed({ smallImgSource, userName, profileFeedI
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
                         </View>
                         <View style={styles.buttonContainer}>
-                            <RequestButton iconName="check-circle" label="Request Sent!" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
+                            <RequestButton iconName="error-outline" label="Error Sending Request!" iconColor="red" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14 }} />
                         </View>
                     </View>
                 </LinearGradient>

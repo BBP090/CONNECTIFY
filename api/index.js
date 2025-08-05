@@ -37,13 +37,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteMessage", async ({ messageId, chatId }) => {
-  await db.promise().query(
-    "DELETE FROM messages WHERE id = ? AND chat_id = ?",
-    [messageId, chatId]
-  );
-          io.to(chatId).emit("messageDeleted", { messageId });
+    await db.promise().query(
+      "DELETE FROM messages WHERE id = ? AND chat_id = ?",
+      [messageId, chatId]
+    );
+    io.to(chatId).emit("messageDeleted", { messageId });
 
-});
+  });
 
 
   // Listen for messages and emit to room
@@ -171,6 +171,8 @@ app.get("/users", (req, res) => {
 
 app.post("/requests/send", (req, res) => {
   const { from_user_id, to_user_id } = req.body;
+  console.log('from user:', from_user_id);
+  console.log('to user:', to_user_id);
   const message = "Hey! I'd like to chat with you.";
 
   const checkQuery = `
@@ -179,10 +181,12 @@ app.post("/requests/send", (req, res) => {
   `;
 
   db.query(checkQuery, [from_user_id, to_user_id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: err });
+    console.log('error: ', err)
 
     if (results.length > 0) {
-      return res.status(409).json({ error: "Request already sent or accepted." });
+      console.log('requests: ', results);
+      return res.status(400).json({ error: "Request already sent or accepted." });
     }
 
     const insertQuery = `
@@ -192,7 +196,7 @@ app.post("/requests/send", (req, res) => {
 
     db.query(insertQuery, [from_user_id, to_user_id, message], (err) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ success: true });
+      return res.status(200).json({ success: true });
     });
   });
 });
@@ -379,6 +383,21 @@ app.post('/api/get-user-profile', (req, res) => {
       }
     });
   } else {
+    const checkQuery = `
+    SELECT * FROM message_requests 
+    WHERE from_user_id = ? AND to_user_id = ? AND status IN ('sent', 'accepted')
+  `;
+
+    db.query(checkQuery, [from_user_id, to_user_id], (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      console.log('error: ', err)
+
+      if (results.length > 0) {
+        console.log('requests: ', results);
+        return res.status(400).json({ error: "Request already sent or accepted." });
+      }
+    }
+    );
     const retrieveAll = `SELECT * FROM users;`
     const retrieveUserQuery = `SELECT DISTINCT
   u.id AS userId, 
