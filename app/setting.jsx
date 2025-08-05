@@ -15,6 +15,8 @@ import {
 } from "react-native";
 import ChangePasswordScreen from '../components/ChangePasswordScreen';
 import { Colors } from "./constants/theme";
+import useGetUserID from "./hooks/useGetUserID";
+
 
 
 export default function SettingsScreen() {
@@ -27,6 +29,8 @@ export default function SettingsScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const { signOut } = useClerk();
+  const { userId: userId, loading: idLoading } = useGetUserID();
+
 
   const handleSignOut = async () => {
     try {
@@ -50,6 +54,11 @@ export default function SettingsScreen() {
     // Add logout logic here
   };
 
+
+  const updateAddress=  ()=>{
+    router.push(`/map`);
+  }
+
   const bgColor = darkMode ? "#000" : Colors.white;
   const textColor = darkMode ? Colors.white : Colors.black;
   const inputBg = darkMode ? "#1a1a1a" : Colors.white;
@@ -68,6 +77,49 @@ export default function SettingsScreen() {
         </View>
       </View>
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: bgColor }]}>
+
+
+
+
+
+
+
+
+         {/* Update Temporary Address Button */}
+  <TouchableOpacity
+    style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
+    onPress={() => {
+      // Add your handler here
+      console.log("Set Preferences");
+    }}
+  >
+    <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
+    onPress={() => router.push('/set_preferences')}>
+      Set Preferences
+    </Text>
+  </TouchableOpacity>
+
+
+
+
+
+
+
+
+
+         {/* Update Temporary Address Button */}
+  <TouchableOpacity
+    style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
+    onPress={() => {
+      // Add your handler here
+      console.log("Update Temporary Address button pressed");
+    }}
+  >
+    <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
+    onPress={() => router.push('/map')}>
+      Update Temporary Address
+    </Text>
+  </TouchableOpacity>
 
         {/* Change Password Option */}
         {/* <TouchableOpacity

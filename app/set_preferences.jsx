@@ -68,7 +68,8 @@ export default function PreferencesScreen() {
       const data = await response.json();
       if (data.success) {
         console.log("Preferences saved:", data);
-        router.replace('/');// Redirect to the homepage after saving preferences
+       // router.replace('/');// Redirect to the homepage after saving preferences
+        router.push('/address');
       }
     } catch (error) {
       console.error("Error saving preferences:", error);

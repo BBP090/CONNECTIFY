@@ -435,3 +435,13 @@ app.get('/api/get-tags', (req, res) => {
     return res.status(200).json({ message: 'Tags Retrieved', arrayOfTags });
   })
 })
+
+app.post('/set_location', (req, res) => {
+  const { userId, latitude, longitude } = req.body;
+  db.query(`
+    Update users set latitude=?, longitude=? where id=?
+    `, [latitude, longitude, userId], (err)=>{
+       if (err) return res.status(500).send("Failed");
+    res.sendStatus(200);
+    })
+})
