@@ -16,6 +16,8 @@ const ProfilePage = ()=>{
   const [photos, setPhotos] = useState([]);
   const {userId} = useGetUserID();
   const [userName, setUserName] = useState('');
+  const [previewVisible, setPreviewVisible] = useState(false);
+const [previewImageUri, setPreviewImageUri] = useState(null);
 
   console.log("USER ID IS   ",userId);
   const handlePickImage = async () => {
@@ -186,12 +188,20 @@ useEffect(() => {
       </View>
 
       <View style={styles.photoGrid}>
-          {photos.map((uri, idx) => (
-            <View key={idx} style={styles.photoBox}>
-              <Image source={{ uri }} style={styles.photos} />
-            </View>
-          ))}
+  {photos.map((uri, idx) => (
+    <TouchableOpacity
+      key={idx}
+      onPress={() => {
+        setPreviewImageUri(uri);
+        setPreviewVisible(true);
+      }}
+    >
+      <View style={styles.photoBox}>
+        <Image source={{ uri }} style={styles.photos} />
       </View>
+    </TouchableOpacity>
+  ))}
+</View>
 
       {/* 🔳 Popup Modal */}
        <Modal
@@ -208,6 +218,20 @@ useEffect(() => {
           </View>
         </View>
       </Modal>
+
+      {/*Photo*/}
+        <Modal
+          visible={previewVisible}
+          transparent={true}
+          onRequestClose={() => setPreviewVisible(false)}
+        >
+          <View style={styles.fullScreenModal}>
+            <Image source={{ uri: previewImageUri }} style={styles.fullImage} />
+            <TouchableOpacity onPress={() => setPreviewVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
     </ScrollView>
   );
 };
@@ -353,6 +377,29 @@ sideButton: {
       marginLeft: 10,
       color: '#28a745',
     },
+
+fullScreenModal: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+fullImage: {
+  width: '90%',
+  height: '70%',
+  resizeMode: 'contain',
+  borderRadius: 10,
+},
+closeButton: {
+  marginTop: 20,
+  padding: 10,
+  backgroundColor: '#fff',
+  borderRadius: 5,
+},
+closeButtonText: {
+  fontSize: 16,
+  color: '#000',
+},
 });
 
 export default ProfilePage;

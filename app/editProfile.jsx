@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import useThemeColors from './hooks/useThemeColors';
 const Colors = useThemeColors();
 import useGetUserID from "./hooks/useGetUserID";
+import {BASE_URL} from "../config/config";
 
 
 export default function EditProfile() {
@@ -23,7 +24,7 @@ export default function EditProfile() {
     if (!userId) return;
 
     try {
-      const res = await fetch("http://192.168.1.66:8000/get-user-by-id", {
+      const res = await fetch(`${BASE_URL}/get-user-by-id`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -67,7 +68,7 @@ export default function EditProfile() {
   }
 
   try {
-    const res = await fetch("http://192.168.1.66:8000/update-user-by-id", {
+    const res = await fetch(`${BASE_URL}/update-user-by-id`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
