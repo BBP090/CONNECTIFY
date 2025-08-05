@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,Alert } from 'react-native';
 import { RadioButton } from 'react-native-paper';
-//import { Colors, DarkColors, Colors } from "../constants/theme";
+
+import { Colors} from "./constants/theme";
 import { BASE_URL } from "../config/config";
 import useGetUserID from "./hooks/useGetUserID";
-import useThemeColors from './hooks/useThemeColors';
-const Colors = useThemeColors();
+//import useThemeColors from './hooks/useThemeColors';
+
 
 
 export default function EditProfile() {
@@ -87,6 +88,11 @@ export default function EditProfile() {
 
     if (res.ok) {
       console.log("✅ Profile updated successfully:", data);
+        Alert.alert(
+        "Success",
+        "Your profile has been updated successfully!",
+        [{ text: "OK" }]
+      );
       // Optional: show success message or navigate
     } else {
       console.error("❌ Failed to update profile:", data.error);
