@@ -353,15 +353,16 @@ app.post("/api/user/preferences", (req, res) => {
 app.post('/api/get-user-profile', (req, res) => {
   const userId = req.body.userId;
   const tags = req.body.tags;
+  const getUserLocation = `
+    SELECT latitude, longitude FROM users WHERE id = ? LIMIT 1;
+  `;
 
-  console.log('tags:', tags);
-
-  if (!userId && !tags)
-    return res.status(500).jsom({ error: 'userId and Tags are required!!!!' });
-
-  if (tags && tags.length) {
+  db.query(getUserLocation, [userId], (err, results) => {
+    if (err || results.length === 0){ 
+      //full og query
+ if (tags && tags.length) {
     const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
-    const retrieveUserQuery = `SELECT DISTINCT u.id AS userId, u.email FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
+    const retrieveUserQuery = `SELECT DISTINCT u.id AS userId, u.name as name ,u.email FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
 
     db.query(retrieveUserQuery, [...tags, userId], (err, result) => {
       if (err) {
@@ -375,13 +376,13 @@ app.post('/api/get-user-profile', (req, res) => {
         return res.status(200).json({ message: 'No user profiles matching the tags.' })
       } else {
         console.log("User profiles retrieved matching the tags:", result);
-        res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
+        return res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
       }
     });
   } else {
     const retrieveAll = `SELECT * FROM users;`
     const retrieveUserQuery = `SELECT DISTINCT
-  u.id AS userId, 
+  u.id AS userId, u.name as name ,
   u.email
 FROM
   preferences p 
@@ -416,11 +417,102 @@ WHERE
 
       } else {
         console.log("User Profiles Retrieved:", result);
+        return res.status(200).json({ message: 'User Profiles Retrieved', result });
+      }
+    });
+  }//
+      }
+
+    
+    const { latitude, longitude } = results[0];
+
+
+  console.log('tags:', tags);
+
+  if (!userId && !tags)
+    return res.status(500).json({ error: 'userId and Tags are required!!!!' });
+
+  if (tags && tags.length) {
+    const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
+    const retrieveUserQuery = ` SELECT distinct u.id AS userId, u.name as name ,u.email, u.latitude, u.longitude,
+          (CASE 
+            WHEN u.latitude IS NOT NULL AND u.longitude IS NOT NULL THEN
+              (6371 * acos(
+                cos(radians(?)) * cos(radians(u.latitude)) *
+                cos(radians(u.longitude) - radians(?)) +
+                sin(radians(?)) * sin(radians(u.latitude))
+              ))
+            ELSE NULL
+          END) AS distance
+        FROM preferences p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.preference IN (${placeholders}) AND u.id != ?
+        
+        ORDER BY
+          CASE WHEN distance IS NULL THEN 1 ELSE 0 END,
+          distance ASC;`;
+
+    db.query(retrieveUserQuery, [latitude, longitude, latitude,...tags, userId], (err, result) => {
+      if (err) {
+        console.error('error:', err);
+        return res.status(500).json({ error: 'Failed to retrieve user profile by tags.' });
+      }
+
+      console.log("Query results:", result.length, "users profiles that match the tag found.");
+
+      if (result.length === 0) {
+        return res.status(200).json({ message: 'No user profiles matching the tags.' })
+      } else {
+        console.log("User profiles retrieved matching the tags:", result);
+        res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
+      }
+    });
+  } else {
+    const retrieveAll = `SELECT * FROM users;`
+    const retrieveUserQuery = `SELECT distinct u.id AS userId, u.name as name ,u.email, u.latitude, u.longitude,
+          (CASE 
+            WHEN u.latitude IS NOT NULL AND u.longitude IS NOT NULL THEN
+              (6371 * acos(
+                cos(radians(?)) * cos(radians(u.latitude)) *
+                cos(radians(u.longitude) - radians(?)) +
+                sin(radians(?)) * sin(radians(u.latitude))
+              ))
+            ELSE NULL
+          END) AS distance
+        FROM preferences p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.preference IN (
+          SELECT preference FROM preferences WHERE user_id = ?
+        ) AND u.id != ?
+        
+        ORDER BY
+          CASE WHEN distance IS NULL THEN 1 ELSE 0 END,
+          distance ASC;`
+    db.query(retrieveUserQuery, [latitude, longitude, latitude, userId, userId], (err, result) => {
+      if (err) {
+        console.error('error:', err);
+        return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+      }
+
+      console.log("Query results:", result.length, "users profiles found");
+
+      if (result.length === 0) {
+        db.query(retrieveAll, (err, result) => {
+          if (err) {
+            console.error('error:', err);
+            return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+          }
+          console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
+          return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
+        })
+
+      } else {
+        console.log("User Profiles Retrieved:", result);
         res.status(200).json({ message: 'User Profiles Retrieved', result });
       }
     });
   }
-});
+});})
 
 app.get('/api/get-tags', (req, res) => {
   const retrieveTags = `SELECT DISTINCT preference from preferences;`;

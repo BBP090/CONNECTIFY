@@ -137,9 +137,10 @@ export default function Home() {
                         return (
                             <UserProfileFeed
                                 key={user.userId}
+                                userName= {user.name}
                                 smallImgSource={smallImgSource}
                                 profileFeedImgSource={profileFeedImgSource}
-                                userName={user.userId}
+                                
                             />
                         )
                     }) : null
