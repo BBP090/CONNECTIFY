@@ -5,6 +5,8 @@ import useGetUserID from "./hooks/useGetUserID";
 import { BASE_URL } from "../config/config";
 import { useRouter } from 'expo-router';
 
+
+
 const map = () => {
   const [marker, setMarker] = useState(null);
   const [showTips, setShowTips] = useState(true); // show tips on first load

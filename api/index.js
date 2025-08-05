@@ -349,6 +349,31 @@ app.post("/api/user/preferences", (req, res) => {
   });
 });
 
+app.post("/api/change_preference", (req, res)=>{
+  const {userId, preferences}= req.body;
+
+  const values = preferences.map((element) => [userId, element]);
+  
+  if (!userId || !preferences) {
+    return res.status(400).json({ error: "User ID and preferences are required." });
+  }
+
+  db.query(`DELETE FROM preferences WHERE user_id = ?;`, [userId], (err, result)=>{
+    if(err){
+      console.error('Error deleteing from prefernece');
+      return res.status(500).json({ error: "Failed to delete preferences" });
+    }
+    db.query(`INSERT INTO preferences (user_id, preference) VALUES ?`, [values], (err, result)=>{
+       if (err) {
+      console.error("Error inserting preferences:", err);
+      return res.status(500).json({ error: "Failed to save preferences" });
+    }
+     res.status(200).json({ success: true, message: "Preferences saved successfully" });
+    console.log(result);
+    })
+  })
+})
+
 
 app.post('/api/get-user-profile', (req, res) => {
   const userId = req.body.userId;

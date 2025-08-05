@@ -14,6 +14,7 @@ import { BASE_URL } from "../config/config.js"; // Adjust path if necessary
 import { Colors } from "./constants/theme.js"; // Adjust the path if needed
 import useGetUserID from "./hooks/useGetUserID.js";
 
+
 const preferencesList = [
   "Music", "Sports", "Games", "Coding", "Tech",
   "Art", "Photography", "Movies", "Fitness", "Travel",

@@ -85,22 +85,21 @@ export default function SettingsScreen() {
 
 
 
-         {/* Update Temporary Address Button 
+       
   <TouchableOpacity
     style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
     onPress={() => {
       // Add your handler here
-      console.log("Set Preferences");
+      console.log("Update Preferences");
     }}
   >
     <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
-    onPress={() => router.push('/set_preferences')}>
-      Set Preferences
+    onPress={() => router.push('/update_preferences')}>
+      Update Preferences
     </Text>
   </TouchableOpacity>
 
 
-*/}
 
 
 
