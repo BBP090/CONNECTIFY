@@ -34,40 +34,38 @@ const VerificationScreen = ({ emailAddress }) => {
             if (signUpAttempt.status === "complete") {
                 await setActive({ session: signUpAttempt.createdSessionId });
                 console.log("signup successful");
-                router.replace('/set_preferences');
                 await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
                 try {
                     const token = await getToken();
                     console.log('Token present:', !!token);
-                    console.log('Calling API to add user:', `${BASE_URL}/api/add-user`);
+                    console.log('Calling API to add user:', `${BASE_URL}/api/add-user-during-signup`);
                     // Send user email to backend MySQL
-                    const response = await fetch(`${BASE_URL}/api/add-user`, {
+                    const response = await fetch(`${BASE_URL}/api/add-user-during-signup`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
+                            // 'Authorization': `Bearer ${token}`,
                         },
                         body: JSON.stringify({ email: emailAddress }),
                     });
 
-                    console.log('Response status:', response.status);
+                    console.log('add user during sign up Response status:', response.status);
                     const data = await response.json();
-                    console.log('Response data:', data);
+                    console.log('add user during sign up Response data:', data.message);
 
                     if (!response.ok) {
                         console.log("API call failed", response.ok);
                     }
                 } catch (error) {
                     console.error("Error adding user:", error);
-                }
-
-
+                };
             }
             else {
                 // if the status is not 'complete' then check why
                 console.error(JSON.stringify(error, null, 2));
             }
+            router.replace('/set_preferences');
         }
         catch (err) {
             console.error(JSON.stringify(err, null, 2));
@@ -101,6 +99,7 @@ const VerificationScreen = ({ emailAddress }) => {
                         Enter the verification code that was sent to your email
                     </Text>
                     <TextInput
+                        autoFocus={true}
                         style={styles.input}
                         placeholder="Verification Code"
                         value={code}
@@ -108,8 +107,7 @@ const VerificationScreen = ({ emailAddress }) => {
                         keyboardType="number-pad"
                         autoCapitalize="none"
                         autoCorrect={false}
-                        autoFocus={true}
-                        editable={!loading}
+                    // editable={!loading}
                     />
 
                     <View style={styles.formSection}>

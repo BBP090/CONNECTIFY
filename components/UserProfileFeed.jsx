@@ -41,7 +41,7 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
             console.error("Error sending request:", error);
             setStatus(false);
         }
-    }
+    };
 
 
     if (status === null) {

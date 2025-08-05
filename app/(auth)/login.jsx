@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ForgotPasswordScreen from '../../components/ForgotPasswordScreen';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
+import { ActivityIndicator } from 'react-native-web';
 
 export default function LoginScreen() {
   const { getToken } = useAuth();
@@ -15,6 +16,15 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [hidePassword, setHidePassword] = useState(true);
   const [newPasswordPage, setNewPasswordPage] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#008000" />
+      </View>
+    );
+  }
 
   const onShowPassword = () => {
     if (hidePassword) {
@@ -27,6 +37,8 @@ export default function LoginScreen() {
   const handleLogin = async () => {
 
     setError('');
+    setLoading(true);
+
     console.log("login pressed");
 
     try {
@@ -64,10 +76,12 @@ export default function LoginScreen() {
           }
         } catch (error) {
           console.error("Error adding user:", error);
+          setLoading(true);
         }
 
         router.replace('/');
       } else {
+        setLoading(true);
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     }
@@ -75,11 +89,10 @@ export default function LoginScreen() {
       console.error(JSON.stringify(err, null, 2))
       if (err) {
         setError(err.errors);
+        setLoading(false);
       }
     }
   };
-
-  if (!isLoaded) return <Text>Loading.....</Text>;
 
   if (newPasswordPage) {
     return (
@@ -119,6 +132,7 @@ export default function LoginScreen() {
       <View style={styles.inputContainer}>
         <Ionicons name="mail-outline" size={20} color="#008000" style={styles.icon} />
         <TextInput
+          autoFocus={true}
           placeholder="Enter your email"
           style={styles.input}
           value={email}
@@ -148,9 +162,16 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       {/* Login Button */}
-      <TouchableOpacity style={styles.loginButton}
+      <TouchableOpacity
+        style={[styles.loginButton, loading && styles.buttonDisabled]}
         onPress={handleLogin}>
-        <Text style={styles.loginText}>Login</Text>
+        {
+          loading ? (
+            <ActivityIndicator color="#008000" />
+          ) : (
+            <Text style={styles.loginText}>Login</Text>
+          )
+        }
       </TouchableOpacity>
 
       {/* Sign Up Link */}
@@ -245,5 +266,8 @@ const styles = StyleSheet.create({
   signupLink: {
     color: '#008000',
     fontWeight: '500',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
   },
 });

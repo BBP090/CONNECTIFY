@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  profile_image TEXT
+  name VARCHAR(255) NULL,
+  profile_image TEXT,
+  email VARCHAR(255) NULL
 );
 
 CREATE TABLE IF NOT EXISTS preferences (
@@ -43,10 +44,11 @@ CREATE TABLE IF NOT EXISTS preferences (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-ALTER TABLE users MODIFY name VARCHAR(255) NULL;
 `;
- 
-//// ALTER TABLE users ADD email VARCHAR(255) NULL;
+
+
+// alter table ongoing_chats add column last_message1 int;
+// alter table ongoing_chats add column last_message2 int;
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,

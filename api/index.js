@@ -118,7 +118,7 @@ app.post('/get-user-id', (req, res) => {
   const query = 'SELECT id FROM users WHERE email = ?';
 
   db.query(query, [email], (err, results) => {
-    if (err) return res.status(500).json({ error: 'DB error' });
+    if (err) return res.status(500).json({ error: err.message });
 
     if (results.length > 0) {
       res.status(200).json({ id: results[0].id });
@@ -128,21 +128,35 @@ app.post('/get-user-id', (req, res) => {
   });
 });
 
+app.post('/api/add-user-during-signup', (req, res) => {
+  const { email } = req.body;
+  console.log('email', email);
+  if (!email) return res.status(400).json({ error: 'Email required' });
+
+  const addUserQuery = `INSERT INTO users(email) VALUES (?);`
+  db.query(addUserQuery, [email], (err, result) => {
+    console.log('error adding user during signup', err);
+    if (err) return res.status(500).json({ error: err.message });
+
+    console.log(result);
+    return res.status(200).json({ message: 'user added' });
+  });
+});
 
 app.post('/api/add-user', (req, res) => {
   console.log("📥 Incoming request to /api/add-user with body:", req.body);
   const { email } = req.body;
+  console.log(email);
   if (!email) return res.status(400).json({ error: 'Email required' });
 
   const checkQuery = 'SELECT * FROM users WHERE email = ?';
   db.query(checkQuery, [email], (err, results) => {
-    console.log("Started checking for exisitng user.")
-    if (err) {
-      console.error("❌ DB error:", err);
-      return res.status(500).json({ error: 'DB error' })
-    }
+    console.log("Started checking for exisitng user.");
 
-    console.log("📊 Query results:", results.length, "users found");
+    if (err) {
+      console.error("DB error:", err);
+      return res.status(500).json({ error: err })
+    }
 
     if (results.length === 0) {
       db.query('INSERT INTO users (email) VALUES (?)', [email], (err2, result) => {
@@ -150,8 +164,11 @@ app.post('/api/add-user', (req, res) => {
         if (!err2) {
           console.log("Inserted.");
           console.log(result.insertId);
-          res.status(200).json({ success: true, userId: result.insertId });
+          return res.status(200).json({ success: true, userId: result.insertId });
         }
+
+        console.log("Query results:", results.length, "users found");
+
       });
     } else {
       console.log("Already existing user.")
@@ -242,6 +259,7 @@ app.get('/ongoing_messages/:userId', (req, res) => {
 
 `, [userId, userId, userId],
     (err, results) => {
+      console.log('error for ongoing_messages2:', err);
       if (err) return res.status(500).json({ error: err.message });
       res.json(results);
     }
@@ -383,39 +401,53 @@ app.post('/api/get-user-profile', (req, res) => {
       }
     });
   } else {
-    const checkQuery = `
-    SELECT * FROM message_requests 
-    WHERE from_user_id = ? AND to_user_id = ? AND status IN ('sent', 'accepted')
-  `;
-
-    db.query(checkQuery, [from_user_id, to_user_id], (err, results) => {
-      if (err) return res.status(500).json({ error: err });
-      console.log('error: ', err)
-
-      if (results.length > 0) {
-        console.log('requests: ', results);
-        return res.status(400).json({ error: "Request already sent or accepted." });
-      }
-    }
-    );
-    const retrieveAll = `SELECT * FROM users;`
-    const retrieveUserQuery = `SELECT DISTINCT
-  u.id AS userId, 
+    const retrieveAll = `SELECT id, email FROM users where id != ?;`;
+    const retrieveUserQuery = `SELECT DISTINCT 
+  u.id AS userId,
   u.email
-FROM
-  preferences p 
+FROM 
+  preferences p
 JOIN 
-  users u ON p.user_id = u.id 
+  users u ON p.user_id = u.id
 WHERE 
-  (
-    p.preference IN (
-      SELECT preference 
-      FROM preferences 
-      WHERE user_id = ?
-      )
+  p.preference IN (
+    SELECT preference 
+    FROM preferences 
+    WHERE user_id = ?
   )
-  AND u.id != ?;`
-    db.query(retrieveUserQuery, [userId, userId], (err, result) => {
+  AND u.id != ?
+  AND u.id NOT IN (
+    SELECT to_user_id 
+    FROM message_requests 
+    WHERE from_user_id = ? AND status = 'sent'
+  )
+  AND u.id NOT IN (
+    SELECT 
+      CASE 
+        WHEN user1_id = ? THEN user2_id
+        WHEN user2_id = ? THEN user1_id
+      END
+    FROM ongoing_chats
+    WHERE user1_id = ? OR user2_id = ?
+  );`;
+
+    //     const retrieveUserQuery = `SELECT DISTINCT
+    //   u.id AS userId, 
+    //   u.email
+    // FROM
+    //   preferences p 
+    // JOIN 
+    //   users u ON p.user_id = u.id 
+    // WHERE 
+    //   (
+    //     p.preference IN (
+    //       SELECT preference 
+    //       FROM preferences 
+    //       WHERE user_id = ?
+    //       )
+    //   )
+    //   AND u.id != ?;`
+    db.query(retrieveUserQuery, [userId, userId, userId, userId, userId, userId, userId], (err, result) => {
       if (err) {
         console.error('error:', err);
         return res.status(500).json({ error: 'Failed to retrieve user profile.' });
@@ -423,20 +455,20 @@ WHERE
 
       console.log("Query results:", result.length, "users profiles found");
 
-      if (result.length === 0) {
-        db.query(retrieveAll, (err, result) => {
-          if (err) {
-            console.error('error:', err);
-            return res.status(500).json({ error: 'Failed to retrieve user profile.' });
-          }
-          console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
-          return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
-        })
+      // if (result.length === 0) {
+      //   db.query(retrieveAll, [userId], (err, result) => {
+      //     if (err) {
+      //       console.error('error:', err);
+      //       return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+      //     }
+      //     console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
+      //     return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
+      //   })
 
-      } else {
-        console.log("User Profiles Retrieved:", result);
-        res.status(200).json({ message: 'User Profiles Retrieved', result });
-      }
+      // } else {
+      console.log("User Profiles Retrieved:", result);
+      res.status(200).json({ message: 'User Profiles Retrieved', result });
+      // }
     });
   }
 });
