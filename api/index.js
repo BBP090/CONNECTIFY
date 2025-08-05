@@ -416,7 +416,7 @@ app.post('/upload-pfp', upload.single('pfp'), (req, res) => {
 app.get('/user/:id', (req, res) => {
   const userId = req.params.id;
 
-  const query = 'SELECT Name, dob, gender, address, contact, profile_image FROM users WHERE id = ?';
+  const query = 'SELECT Name, dob, gender, address, contact, profile_image, Bio FROM users WHERE id = ?';
 
   db.query(query, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: "Database error" });

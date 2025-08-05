@@ -16,6 +16,7 @@ const ProfilePage = ()=>{
   const [photos, setPhotos] = useState([]);
   const {userId} = useGetUserID();
   const [userName, setUserName] = useState('');
+  const [bio, setBio] = useState('');
   const [previewVisible, setPreviewVisible] = useState(false);
 const [previewImageUri, setPreviewImageUri] = useState(null);
 
@@ -136,6 +137,10 @@ useEffect(() => {
       if (data.Name) {
          setUserName(data.Name);  // Use exact column name from SQL
       }
+      console.log(data.Bio);
+      if(data.Bio){
+        setBio(data.Bio);
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -176,7 +181,7 @@ useEffect(() => {
       <Text style={styles.username}>{userName}</Text>
 
       <View style={styles.bioContainer}>
-        <Text>Bio here</Text>
+        <Text>{bio}</Text>
       </View>
 
       {/* Photos tab */}
