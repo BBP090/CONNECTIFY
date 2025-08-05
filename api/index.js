@@ -558,7 +558,7 @@ WHERE
       }
     });
   } else {
-    const retrieveAll = `SELECT * FROM users;`
+    const retrieveAll = `SELECT * FROM users where id!=1;`
     const retrieveUserQuery = `SELECT distinct u.id AS userId, u.name as name ,u.email, u.latitude, u.longitude,
           (CASE 
             WHEN u.latitude IS NOT NULL AND u.longitude IS NOT NULL THEN

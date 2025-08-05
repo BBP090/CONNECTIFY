@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS users (
   profile_image TEXT,
   bio VARCHAR(255)
 );
+
+
+alter table users add column DoB DATE;
 alter table ongoing_chats add column last_message1 int;
 alter table ongoing_chats add column last_message2 int;
 ALTER TABLE users MODIFY name VARCHAR(255) NULL;
