@@ -18,6 +18,7 @@ app.use(express.json());
 
 const port = 8000;
 const cors = require("cors");
+// const { BounceIn } = require("react-native-reanimated");
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -317,19 +318,19 @@ app.delete("/delete_chat/:chatId", (req, res) => {
 });
 
 app.post('/update-user-by-id', (req, res) => {
-  const { userId, userName, dob, gender, address, contact } = req.body;
+  const { userId, userName, dob, gender, address, contact, bio } = req.body;
 
-  if (!userId || !userName || !dob || !gender || !address || !contact) {
+  if (!userId || !userName || !dob || !gender || !address || !contact ) {
     return res.status(400).json({ error: "All fields are required." });
   }
 
   const query = `
     UPDATE users 
-    SET Name = ?, dob = ?, gender = ?, address = ?, contact = ? 
+    SET Name = ?, dob = ?, gender = ?, address = ?, contact = ?, Bio = ?
     WHERE id = ?
   `;
 
-  const values = [userName, dob, gender, address, contact, userId];
+  const values = [userName, dob, gender, address, contact, bio, userId];
 
   db.query(query, values, (err, result) => {
     if (err) {
@@ -350,7 +351,7 @@ app.post('/get-user-by-id', (req, res) => {
 
   if (!userId) return res.status(400).json({ error: "User ID is required" });
 
-  const query = 'SELECT Name, dob, gender, address, contact FROM users WHERE id = ?';
+  const query = 'SELECT Name, dob, gender, address, contact, Bio FROM users WHERE id = ?';
 
   db.query(query, [userId], (err, results) => {
     if (err) {

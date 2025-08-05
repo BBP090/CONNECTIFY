@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS messages (
   message TEXT,
   message_type ENUM('text', 'image') NOT NULL,
   image_url TEXT,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  bio VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -38,7 +39,8 @@ CREATE TABLE IF NOT EXISTS users (
   Gender ENUM('Male', 'Female', 'Other'),
   Address TEXT,
   Contact TEXT,
-  profile_image TEXT
+  profile_image TEXT,
+  bio VARCHAR(255)
 );
 alter table ongoing_chats add column last_message1 int;
 alter table ongoing_chats add column last_message2 int;

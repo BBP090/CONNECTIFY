@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
-import { useEffect } from 'react';
 //import { Colors, DarkColors, Colors } from "../constants/theme";
+import { BASE_URL } from "../config/config";
+import useGetUserID from "./hooks/useGetUserID";
 import useThemeColors from './hooks/useThemeColors';
 const Colors = useThemeColors();
-import useGetUserID from "./hooks/useGetUserID";
-import {BASE_URL} from "../config/config";
 
 
 export default function EditProfile() {
@@ -17,6 +16,7 @@ export default function EditProfile() {
   const [gender, setGender] = useState('male');
   const [address, setAddress] = useState('');
   const [contact, setContact] = useState('');
+  const [bio, setBio] = useState('');
   const { userId, emailAddress } = useGetUserID();
 
   useEffect(() => {
@@ -31,6 +31,7 @@ export default function EditProfile() {
       });
 
       const data = await res.json();
+      console.log("Data: ", data);
 
       if (res.ok) {
         setuserName(data.Name || '');
@@ -45,7 +46,7 @@ export default function EditProfile() {
         if (data.gender) {
           setGender(data.gender.toLowerCase()); // assuming API sends "Male", "FEMALE", etc.
         }
-
+        setBio(data.Bio || '');
         setAddress(data.address || '');
         setContact(data.contact || '');
       } else {
@@ -72,12 +73,13 @@ export default function EditProfile() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
-        userName,
-        dob: fullDob,
-        gender,
-        address,
-        contact,
+          userId,
+          userName,
+          dob: fullDob,
+          gender,
+          address,
+          contact,
+          bio,
       }),
     });
 
@@ -163,22 +165,33 @@ export default function EditProfile() {
       </View>
 
       <Text style={styles.label}>Address</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        value={address}
-        onChangeText={setAddress}
-      />
+<TextInput
+  style={styles.input}
+  placeholder="Address"
+  value={address}
+  onChangeText={setAddress}
+/>
 
-      <Text style={styles.label}>Contact No</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="98XXXXXXXX"
-        value={contact}
-        onChangeText={setContact}
-        keyboardType="phone-pad"
-        underlineColorAndroid="transparent"  // ✅ This removes Android underline
-      />
+<Text style={styles.label}>Contact No</Text>
+<TextInput
+  style={styles.input}
+  placeholder="98XXXXXXXX"
+  value={contact}
+  onChangeText={setContact}
+  keyboardType="phone-pad"
+  underlineColorAndroid="transparent"
+/>
+
+<Text style={styles.label}>Bio</Text>
+<TextInput
+  style={[styles.input, styles.bioInput]}
+  placeholder="Tell us about yourself"
+  value={bio}
+  onChangeText={setBio}
+  multiline
+  numberOfLines={4}
+/>
+
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveText}>Save</Text>
@@ -237,4 +250,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  bioInput: {
+    minHeight: 80,
+    textAlignVertical: 'top',  // for Android to start text at top
+},
 });
