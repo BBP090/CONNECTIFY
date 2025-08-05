@@ -23,6 +23,18 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// Disk storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    const filename = Date.now() + '-' + file.originalname;
+    cb(null, filename);
+  }
+});
+
+const upload = multer({ storage });
 
 // <<<<<<< HEAD
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -666,18 +678,7 @@ app.post('/get-user-by-id', (req, res) => {
 });
 
 
-// Disk storage config
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Make sure this directory exists
-  },
-  filename: function (req, file, cb) {
-    const filename = Date.now() + '-' + file.originalname;
-    cb(null, filename);
-  }
-});
 
-const upload = multer({ storage });
 
 app.post('/upload-pfp', upload.single('pfp'), (req, res) => {
   const userId = req.body.userId;
