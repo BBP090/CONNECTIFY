@@ -68,7 +68,7 @@ export default function PreferencesScreen() {
       const data = await response.json();
       if (data.success) {
         console.log("Preferences saved:", data);
-        router.replace('/');// Redirect to the homepage after saving preferences
+        router.replace('/editProfile');// Redirect to the homepage after saving preferences
       }
     } catch (error) {
       console.error("Error saving preferences:", error);

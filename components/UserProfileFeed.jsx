@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -54,10 +54,13 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
                 >
                     <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
                         <View style={styles.profileTitleContainer}>
+
                             <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
-                            <View style={styles.profileUserNameContainer}>
-                                <Text style={[styles.profileUserName]}>{userName}</Text>
-                            </View>
+                            <TouchableOpacity onPress={()=>router.push('/viewProfile')}>
+                                <View style={styles.profileUserNameContainer}>
+                                    <Text style={[styles.profileUserName]}>{userName}</Text>
+                                </View>
+                            </TouchableOpacity>
                         </View>
                         <View style={{ flex: 1 }}>
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
@@ -69,7 +72,7 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
                                 iconName="check-circle-outline" label="Send Request" iconColor="green" labelStyle={{ fontFamily: "Poppins_500Medium", fontSize: 14, marginLeft: 2 }} />
                         </View>
                     </View >
-                </LinearGradient>
+                </LinearGradient >
                 <View style={{ padding: 5 }}>
                 </View>
             </>
