@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,Alert } from 'react-native';
 import { RadioButton } from 'react-native-paper';
-
+import {Stack} from 'expo-router'
 import { Colors} from "./constants/theme";
 import { BASE_URL } from "../config/config";
 import useGetUserID from "./hooks/useGetUserID";
+import { useLayoutEffect } from 'react';
+import { useNavigation } from 'expo-router';
 //import useThemeColors from './hooks/useThemeColors';
 
 
@@ -19,6 +21,8 @@ export default function EditProfile() {
   const [contact, setContact] = useState('');
   const [bio, setBio] = useState('');
   const { userId, emailAddress } = useGetUserID();
+
+  
 
   useEffect(() => {
   const fetchUserData = async () => {
@@ -103,9 +107,8 @@ export default function EditProfile() {
 };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Edit Profile</Text>
-
       <Text style={styles.label}>Name</Text>
       <View style={styles.row}>
         <TextInput
