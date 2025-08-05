@@ -24,11 +24,18 @@ import CryptoJS from "crypto-js";
 import { v4 as uuidv4 } from 'uuid';
 import io from "socket.io-client";
 import { BASE_URL } from "../config/config"; // adjust the path as needed
+
+
+
+
+
 const socket = io(`${BASE_URL}`);  // Localhost for Android emulator
 
 
 
 const ChatMessagesScreen = () => {
+    //const [modalVisible, setModalVisible] = useState(false);
+
   const { chatId } = useLocalSearchParams();
   const [receiverId, setReceiverId]= useState(null);
   const [chat, setChat]= useState(null);
@@ -42,7 +49,10 @@ const ChatMessagesScreen = () => {
   const scrollViewRef = useRef(null);
 const SHARED_SECRET_KEY = "supersecretkey123";
     const [messageToDelete, setMessageToDelete] = useState(null);
+      const [selectedImage, setSelectedImage] = useState(null);
+
    // const uuidv4 = () => Math.random().toString(36).substring(2, 15);
+
 
 
 
@@ -131,31 +141,76 @@ useEffect(()=>{
 
 //const receiverId = chat.user1_id === userId ? chat.user2_id : chat.user1_id;
 // id: result 
-
 const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.All,
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [4, 3],
     quality: 1,
   });
-  const message= 'Photo file(s) are received.'
-  const encryptedText = CryptoJS.AES.encrypt(message, SHARED_SECRET_KEY).toString();
-  if (!result.canceled) {
-    const newImageMessage = {
-      _id: uuidv4(),
-      messageType: "image",
-      message:encryptedText,
-      imageUrl: result.uri,
-      timeStamp: new Date(),
-      senderId: userId,
-      chatId: chatId,
-    };
+    const uri = result.assets[0].uri;
+    
 
-    socket.emit("sendMessage", newImageMessage);
-    setMessages((prev) => [...prev, newImageMessage]);
-  }
+  if (!result.canceled && result.assets && result.assets.length > 0) {
+          await uploadImage(uri);
+  }};
+
+
+  const uploadImage = async (uri) => {
+    const formData = new FormData();
+      formData.append("img", {
+    uri: uri,
+    name: "upload.jpg",           // any name with valid extension
+    type: "image/jpeg",           // or image/png etc.
+  });
+
+
+  formData.append("userId", userId);
+ formData.append("chatId", chatId);
+
+    const res = await fetch(`${BASE_URL}/upload-img`, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    const data = await res.json();  // parse JSON response from your backend
+
+const imageUrl = data.imageUrl;  // get the uploaded image URL returned by backend
+
+if (imageUrl) {
+  sendImageMessage(imageUrl);   // send the socket message with this image URL
+} else {
+  console.warn("Image upload failed or no image URL returned");
+}
+
+
+
 };
+
+
+
+const sendImageMessage = (imageUrl) => {
+  const messageText = "Photo file(s) are received.";
+  const encryptedText = CryptoJS.AES.encrypt(messageText, SHARED_SECRET_KEY).toString();
+
+  const imageMessage = {
+    _id: uuidv4(),
+    messageType: "image",
+    message: encryptedText,
+    imageUrl: imageUrl,
+    timeStamp: new Date(),
+    senderId: userId,
+    chatId: chatId,
+    receiverId: receiverId,
+  };
+
+  socket.emit("sendMessage", imageMessage);
+  setMessages((prev) => [...prev, imageMessage]);
+};
+
 
 
 
@@ -209,6 +264,9 @@ const handleSend = () => {
         {messages.map((item, index) => {
           const isSelected = selectedMessages.includes(item._id);
           const isSelf = item.sender_id === userId;
+          const fullImageUrl = `${BASE_URL}${item.image_url}`;
+// For example, BASE_URL = "http://yourserver.com/api"
+
          
           if (item.message_type === "text") {
             const decryptedMessage = CryptoJS.AES.decrypt(item.message, SHARED_SECRET_KEY).toString(CryptoJS.enc.Utf8);
@@ -264,7 +322,7 @@ const handleSend = () => {
                 }}
               >
                 <Image
-                  source={{ uri: item.image_url }}
+                  source={{ uri: fullImageUrl }}
                   style={{ width: 200, height: 200, borderRadius: 7 }}
                 />
                 <Text
@@ -398,6 +456,8 @@ const handleSend = () => {
 
     </KeyboardAvoidingView>
   );
+ 
+
 };
 
 export default ChatMessagesScreen;

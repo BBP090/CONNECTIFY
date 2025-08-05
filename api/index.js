@@ -2,6 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const db = require('./database');
 
+const multer = require('multer');
+//const upload = multer({ dest: 'uploads/' }); // or set up storage for filename/path
+
 const http = require("http");
 const socketIo = require("socket.io");
 const app = express();
@@ -20,6 +23,10 @@ app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static('uploads'));
+
+
 
 // Listen for connection
 io.on("connection", (socket) => {
@@ -109,6 +116,50 @@ io.on("connection", (socket) => {
 server.listen(port, () => {
   console.log(` Server + Socket.IO running on http://localhost:${port}`);
 });
+
+
+
+// Disk storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    const filename = Date.now() + '-' + file.originalname;
+    cb(null, filename);
+  }
+});
+
+
+const upload = multer({ storage });
+
+app.post('/upload-img', upload.single('img'), async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const chatId = req.body.chatId;
+
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: "No file uploaded" });
+
+    const imagePath = `/uploads/${file.filename}`;
+
+    // Insert message into DB as an image message
+    const [result] = await db.promise().query(
+      `INSERT INTO messages (chat_id, sender_id, message_type, message, image_url) VALUES (?, ?, 'image',? ,?)`,
+      [chatId, userId,'' ,imagePath]
+    );
+
+    // Respond with image URL and inserted message ID (optional)
+    res.json({ imageUrl: imagePath, messageId: result.insertId });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+
 
 
 app.post('/get-user-id', (req, res) => {
