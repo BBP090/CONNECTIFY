@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { useSignUp, useAuth } from '@clerk/clerk-expo';
 import { BASE_URL } from "../config/config"; // adjust the path as needed
 
-const VerificationScreen = ({emailAddress}) => {
+const VerificationScreen = ({ emailAddress }) => {
     const { signUp, isLoaded, setActive } = useSignUp();
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
@@ -29,7 +29,7 @@ const VerificationScreen = ({emailAddress}) => {
             // attempt for verification with the code provided by the user against the code sent
             const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
             // returns object with current signUp status, sessionid
-            
+
             // if the verification process is completed set user to active and redirect to another page
             if (signUpAttempt.status === "complete") {
                 await setActive({ session: signUpAttempt.createdSessionId });
@@ -39,9 +39,9 @@ const VerificationScreen = ({emailAddress}) => {
 
                 try {
                     const token = await getToken();
-                    console.log('🔑 Token present:', !!token);
-                    console.log('🌐 Calling API:', `${BASE_URL}/api/add-user`);
-                    // ✅ Send user email to backend MySQL
+                    console.log('Token present:', !!token);
+                    console.log('Calling API to add user:', `${BASE_URL}/api/add-user`);
+                    // Send user email to backend MySQL
                     const response = await fetch(`${BASE_URL}/api/add-user`, {
                         method: 'POST',
                         headers: {
@@ -51,9 +51,9 @@ const VerificationScreen = ({emailAddress}) => {
                         body: JSON.stringify({ email: emailAddress }),
                     });
 
-                    console.log('📡 Response status:', response.status);
+                    console.log('Response status:', response.status);
                     const data = await response.json();
-                    console.log('📦 Response data:', data);
+                    console.log('Response data:', data);
 
                     if (!response.ok) {
                         console.log("API call failed", response.ok);
@@ -109,17 +109,17 @@ const VerificationScreen = ({emailAddress}) => {
                         autoCapitalize="none"
                         autoCorrect={false}
                         autoFocus={true}
-                    // editable={!loading}
+                        editable={!loading}
                     />
 
                     <View style={styles.formSection}>
                         <TouchableOpacity
                             style={[styles.button, loading && styles.buttonDisabled]}
                             onPress={onVerifyPress}
-                        // disabled={loading}
+                            disabled={loading}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#FFFFFF" />
+                                <ActivityIndicator color="#008000" />
                             ) : (
                                 <Text style={styles.buttonText}>Verify</Text>
                             )}
@@ -200,10 +200,10 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#008000',
         borderRadius: 8,
-        padding: 16,
+        padding: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 50,
+        minHeight: 30,
     },
     buttonDisabled: {
         backgroundColor: '#ccc',

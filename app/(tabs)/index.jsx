@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, StyleSheet, Pressable } from 'react-native';
+import { View, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import { Platform } from 'react-native';
 import { useState, useEffect } from 'react';
 import { useFonts, Poppins_600SemiBold, Poppins_500Medium, Poppins_400Regular } from '@expo-google-fonts/poppins';
@@ -20,6 +20,7 @@ export default function Home() {
     const [selectedTags, setSelectedTags] = useState([]);
     const { userId } = useGetUserID();
     const { isSignedIn } = useAuth();
+    const [loading, setLoading] = useState(false);
 
 
     // console log to check sign in state and users retrieved
@@ -28,8 +29,10 @@ export default function Home() {
     console.log('users:', users);
     console.log('selected tags:', selectedTags);
 
+    // to retrieve tags dynamically 
     useEffect(() => {
         const retrieveTags = async () => {
+            setLoading(true);
             try {
                 console.log('Calling API to retrieve tags:', `${BASE_URL}/api/get-tags`);
                 const response = await fetch(`${BASE_URL}/api/get-tags`, {
@@ -40,12 +43,19 @@ export default function Home() {
                     },
                 });
 
+
                 const data = await response.json();
                 console.log('tags:', data);
                 setTags(data.arrayOfTags);
+                setLoading(false);
+
+                if (!response.ok) {
+                    console.log("API call failed", response.ok);
+                }
 
             } catch (err) {
                 console.error('Error fetching tags:', err);
+                setLoading(false);
             }
         };
 
@@ -56,9 +66,10 @@ export default function Home() {
     useEffect(() => {
         if (!userId) return;
         const retrieveUser = async () => {
+            // setLoading(true);
             try {
                 console.log('Calling API:', `${BASE_URL}/api/get-user-profile`);
-                // ✅ Send user email to backend MySQL
+                // Send user email to backend MySQL
                 const response = await fetch(`${BASE_URL}/api/get-user-profile`, {
                     method: 'POST',
                     headers: {
@@ -75,12 +86,14 @@ export default function Home() {
                 const data = await response.json();
 
                 setUsers(data.result);
+                // setLoading(false);
 
                 if (!response.ok) {
                     console.log("API call failed", response.ok);
                 }
             } catch (error) {
                 console.error("Error retrieving users:", error);
+                // setLoading(false);
             }
         }
         retrieveUser();
@@ -107,9 +120,11 @@ export default function Home() {
         return null;
     }
 
-
     return (
         <>
+            {/* { */}
+                {/* // loading && <ActivityIndicator color="#FFFFFF" /> */}
+            {/* } */}
             <View style={styles.tagsContainer}>
                 <FeedTags tags={tags} checker={checker} issSelected={issSelected} />
             </View>

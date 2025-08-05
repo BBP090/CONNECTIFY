@@ -402,8 +402,8 @@ WHERE
             console.error('error:', err);
             return res.status(500).json({ error: 'Failed to retrieve user profile.' });
           }
-          console.log("Query results:", result.length, "users profiles found");
-          return res.status(200).json({ message: 'All users profiles retrieved', result })
+          console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
+          return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
         })
 
       } else {

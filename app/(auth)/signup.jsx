@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { useSignUp, useAuth } from '@clerk/clerk-expo';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
+import { useSignUp } from '@clerk/clerk-expo';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, ActivityIndicator } from 'react-native';
 import VerificationScreen from '../../components/VerificationScreen';
 
 export default function SignUpScreen() {
@@ -13,6 +13,7 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const onShowPassword = () => {
     if (showPassword) {
@@ -22,14 +23,23 @@ export default function SignUpScreen() {
     }
   }
 
+  if (!isLoaded) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#008000" />
+      </View>
+    );
+  }
 
   // handle submission of sign up form
   const handleSignUp = async () => {
 
     setError(undefined);
-
+    setLoading(true);
     if (!emailAddress || !password) {
+      setLoading(false);
       Alert.alert('Error', 'Please fill in all fields');
+      // setError('Please fill in all fields');
       return;
     }
 
@@ -53,14 +63,11 @@ export default function SignUpScreen() {
     }
     catch (err) {
       console.error(JSON.stringify(err, null, 2));
-      if (err) {
-        setError(err.errors);
-      }
+      setError(err.errors);
+      setLoading(false);
     };
   };
 
-
-  if (!isLoaded) return <Text>Loading.....</Text>;
 
   // when the user starts verification process display the following content
   if (pendingVerification) {
@@ -71,12 +78,12 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Back Button
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity> */}
+      {/* /* Back Button */}
+      {/* <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <Ionicons name="chevron-back" size={24} color="black" />
+              </TouchableOpacity>  */}
 
-      {/* Heading */}
+      {/*  Heading */}
       <Text style={styles.title}>Lets{"\n"}Get Started</Text>
 
       {/* Subtitle */}
@@ -125,24 +132,40 @@ export default function SignUpScreen() {
           onChangeText={setPassword}
           secureTextEntry={showPassword}
         />
-        <TouchableOpacity onPress={onShowPassword} style={styles.icon}>
+        <TouchableOpacity
+          onPress={onShowPassword}
+          style={styles.icon}>
           <MaterialIcons name="visibility-off" size={19} />
         </TouchableOpacity>
       </View>
 
       {/* Sign Up Button */}
-      <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
-        <Text style={styles.signupText}>Sign up</Text>
+      <TouchableOpacity
+        style={[styles.signupButton, loading && styles.buttonDisabled]}
+        onPress={handleSignUp}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#008000" />
+
+        ) :
+          <Text style={styles.signupText}>Sign up</Text>
+        }
       </TouchableOpacity>
 
       {/* Login Link */}
       <Text style={styles.loginText}>
         Already have an account?{' '}
-        <Text style={styles.loginLink} onPress={() => router.push('/login')}>
-          Login
-        </Text>
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          disabled={loading}
+        >
+          <Text style={styles.loginLink}>
+            Login
+          </Text>
+        </TouchableOpacity>
       </Text>
-    </View>
+    </View >
   );
 };
 
@@ -197,13 +220,19 @@ const styles = StyleSheet.create({
   },
   signupButton: {
     backgroundColor: '#008000',
-    paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
+    padding: 10,
     alignItems: 'center',
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    justifyContent: 'center',
+    minHeight: 30,
+    // backgroundColor: '#008000',
+    // paddingVertical: 14,
+    // borderRadius: 12,
+    // alignItems: 'center',
+    // marginTop: 10,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowOffset: { width: 0, height: 2 },
   },
   signupText: {
     color: '#fff',
@@ -218,5 +247,8 @@ const styles = StyleSheet.create({
   loginLink: {
     color: '#008000',
     fontWeight: '500',
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
   },
 });

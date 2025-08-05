@@ -24,7 +24,7 @@ export default function FeedTags({ tags, checker, issSelected }) {
                 // };
                 return (
                     <Pressable
-                        style={[styles.preferenceTagsButton, { color: isSelected ? "white" : "black", backgroundColor: isSelected ? "#FAEBD7" : "white" }]}
+                        style={[styles.preferenceTagsButton, { color: isSelected ? "white" : "black", backgroundColor: isSelected ? "#008000" : "white", borderColor: isSelected ? "#008000" : "#ccc"}]}
                         onPress={() => {
                             console.log('clicked');
                             checker(isSelected, item);

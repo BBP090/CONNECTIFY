@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
   View
 } from "react-native";
 import { BASE_URL } from "../config/config.js"; // Adjust path if necessary
@@ -20,10 +21,19 @@ const preferencesList = [
 ];
 
 export default function PreferencesScreen() {
-  const { userId, email } = useGetUserID();  // Get the userId from Clerk's session
+  const { userId, loading } = useGetUserID();  // Get the userId from Clerk's session
+  const [load, setLoad] = useState(false);
   const [selectedPreferences, setSelectedPreferences] = useState([]);
   const [otherPreference, setOtherPreference] = useState("");
   console.log(selectedPreferences);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#008000" />
+      </View>
+    );
+  }
 
   // Handle preferences change
   const togglePreference = (item, isSelected) => {
@@ -35,6 +45,9 @@ export default function PreferencesScreen() {
   };
 
   const handleSubmit = async () => {
+
+    setLoad(true);
+
     const allPreferences = [...selectedPreferences];
     if (otherPreference.trim()) {
       allPreferences.push(`Other: ${otherPreference.trim()}`);
@@ -59,52 +72,60 @@ export default function PreferencesScreen() {
       }
     } catch (error) {
       console.error("Error saving preferences:", error);
+      setLoad(false);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.heading}>What are your preferences?</Text>
+    load ? (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]} >
+        < ActivityIndicator size="large" color="#008000" />
+      </View >
+    ) :
+      (
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.heading}>What are your preferences?</Text>
 
-      <View style={styles.preferenceGrid}>
-        {/* Display list of preferences */}
-        {preferencesList.map((item) => {
-          const isSelected = selectedPreferences.includes(item);
-          return (
-            <TouchableOpacity
-              key={item}
-              style={[
-                styles.preferenceItem,
-                (isSelected) && styles.selectedItem,
-              ]}
-              onPress={() => togglePreference(item, isSelected)}
-            >
-              <Text
-                style={[
-                  styles.preferenceText,
-                  (isSelected) && styles.selectedText,
-                ]}
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          )
-        })}
-      </View>
+          <View style={styles.preferenceGrid}>
+            {/* Display list of preferences */}
+            {preferencesList.map((item) => {
+              const isSelected = selectedPreferences.includes(item);
+              return (
+                <TouchableOpacity
+                  key={item}
+                  style={[
+                    styles.preferenceItem,
+                    (isSelected) && styles.selectedItem,
+                  ]}
+                  onPress={() => togglePreference(item, isSelected)}
+                >
+                  <Text
+                    style={[
+                      styles.preferenceText,
+                      (isSelected) && styles.selectedText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
 
-      <TextInput
-        autoFocus={true}
-        style={styles.input}
-        placeholder="Other interests..."
-        value={otherPreference}
-        onChangeText={setOtherPreference}
-        placeholderTextColor={Colors.lightGrey}
-      />
+          <TextInput
+            autoFocus={true}
+            style={styles.input}
+            placeholder="Other interests..."
+            value={otherPreference}
+            onChangeText={setOtherPreference}
+            placeholderTextColor={Colors.lightGrey}
+          />
 
-      <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
-        <Ionicons name="arrow-forward-circle" size={40} color={Colors.primary} />
-      </TouchableOpacity>
-    </ScrollView>
+          <TouchableOpacity style={styles.nextButton} onPress={handleSubmit}>
+            <Ionicons name="arrow-forward-circle" size={40} color={Colors.primary} />
+          </TouchableOpacity>
+        </ScrollView>
+      )
   );
 }
 // Styles for the component
