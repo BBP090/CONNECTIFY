@@ -1,9 +1,9 @@
- const mysql = require('mysql2');
- const dotenv = require('dotenv');
- dotenv.config();
+const mysql = require('mysql2');
+const dotenv = require('dotenv');
+dotenv.config();
 
-
-const schema = `CREATE DATABASE IF NOT EXISTS chat_app;
+const schema = `
+CREATE DATABASE IF NOT EXISTS chat_app;
 
 CREATE TABLE IF NOT EXISTS message_requests (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,17 +52,26 @@ CREATE TABLE IF NOT EXISTS user_photos (
   image_path VARCHAR(255),
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);`;
+);
+CREATE TABLE IF NOT EXISTS preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  preference VARCHAR(255) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
- const db = mysql.createPool({
-     host: process.env.DB_HOST,
-     user: process.env.DB_USER,
-     password: process.env.DB_PASSWORD,
-     database: 'chat_app',
-     multipleStatements: true
- });
+ALTER TABLE users MODIFY name VARCHAR(255) NULL;
+`;
+ 
+//// ALTER TABLE users ADD email VARCHAR(255) NULL;
 
-
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: 'chat_app',
+  multipleStatements: true
+});
 
 // ✅ Use a connection from the pool to set up the schema once
 db.getConnection((err, connection) => {
