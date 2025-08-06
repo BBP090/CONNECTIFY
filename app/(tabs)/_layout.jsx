@@ -49,7 +49,7 @@ export default function TabsLayout() {
                                     onPress={() => router.push('/setting')}
                                     style={{ marginRight: 15 }}
                                 >
-                                    <Ionicons name="settings-outline" size={24} color="black" />
+                                    <Ionicons name="settings-outline" size={24} color="#fff" />
                                 </TouchableOpacity>
                             ),
                         }}

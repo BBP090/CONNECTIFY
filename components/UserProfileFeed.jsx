@@ -34,12 +34,12 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
             const data = await response.json();
             console.log('request sent:', data);
 
+            if (data.error)
+                setStatus(false);
+            
             if (data.success)
                 setStatus(true);
 
-            if (!response.ok) {
-                console.log("API call failed", response.ok);
-            }
         } catch (error) {
             console.error("Error sending request:", error);
             setStatus(false);
@@ -95,9 +95,15 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
                     <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
                         <View style={styles.profileTitleContainer}>
                             <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
-                            <View style={styles.profileUserNameContainer}>
-                                <Text style={[styles.profileUserName]}>{userName}</Text>
-                            </View>
+                            <TouchableOpacity
+                                style={styles.profileUserNameContainer}
+                                onPress={() => router.push({
+                                    pathname: '/viewProfile',
+                                    params: { userId: sentTo.toString() }
+                                })}
+                            >
+                                <Text style={styles.profileUserName}>{userName}</Text>
+                            </TouchableOpacity>
                         </View>
                         <View style={{ flex: 1 }}>
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>
@@ -122,9 +128,15 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
                     <View style={[styles.userFeed1, Platform.OS === 'web' && { width: 450 }]}>
                         <View style={styles.profileTitleContainer}>
                             <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
-                            <View style={styles.profileUserNameContainer}>
-                                <Text style={[styles.profileUserName]}>{userName}</Text>
-                            </View>
+                            <TouchableOpacity
+                                style={styles.profileUserNameContainer}
+                                onPress={() => router.push({
+                                    pathname: '/viewProfile',
+                                    params: { userId: sentTo.toString() }
+                                })}
+                            >
+                                <Text style={styles.profileUserName}>{userName}</Text>
+                            </TouchableOpacity>
                         </View>
                         <View style={{ flex: 1 }}>
                             <Image source={profileFeedImgSource} style={styles.profileFeedImage}></Image>

@@ -9,18 +9,18 @@ import useGetUserID from "../hooks/useGetUserID";
 
 
 
-const ProfilePage = ()=>{
+const ProfilePage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedUrl, setUploadedUrl] = useState(null);
   const [photos, setPhotos] = useState([]);
-  const {userId} = useGetUserID();
+  const { userId } = useGetUserID();
   const [userName, setUserName] = useState('');
   const [bio, setBio] = useState('');
   const [previewVisible, setPreviewVisible] = useState(false);
-const [previewImageUri, setPreviewImageUri] = useState(null);
+  const [previewImageUri, setPreviewImageUri] = useState(null);
 
-  console.log("USER ID IS   ",userId);
+  console.log("USER ID IS   ", userId);
   const handlePickImage = async () => {
     // const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     // if (!permissionResult.granted) return alert('Permission required!');
@@ -39,143 +39,148 @@ const [previewImageUri, setPreviewImageUri] = useState(null);
       console.log("Result is", JSON.stringify(result, null, 2));
       await uploadImage(uri);
     }
-    else{
+    else {
       console.log("No U!resultcancelled");
     }
   };
 
   const uploadImage = async (uri) => {
     const formData = new FormData();
-      formData.append("pfp", {
-    uri: uri,
-    name: "upload.jpg",           // any name with valid extension
-    type: "image/jpeg",           // or image/png etc.
-  });
-
-  formData.append("userId", userId);
-
-     try {
-    const res = await fetch(`${BASE_URL}/upload-pfp`, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    formData.append("pfp", {
+      uri: uri,
+      name: "upload.jpg",           // any name with valid extension
+      type: "image/jpeg",           // or image/png etc.
     });
 
-    const text = await res.text(); // 🔄 Try text first
-    if (!res.ok) {
-      console.error("❌ Upload failed:", text);
-      return;
-    }
-
-    const data = JSON.parse(text); // ✅ now safe to parse
-    console.log("✅ Upload success:", data);
-     // ✅ Immediately update UI
-    // setUploadedUrl(`${BASE_URL}/uploads/${data.filename}`);
-  } catch (error) {
-    console.error("❌ Upload error:", error);
-  }
-
-};
-
-const handleAddPhoto = async () => {
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images', 'videos'],
-    allowsEditing: true,
-    quality: 0.8,
-  });
-
-  if (!result.canceled && result.assets?.length > 0) {
-    const uri = result.assets[0].uri;
-    const formData = new FormData();
-
-    formData.append("image", {
-      uri,
-      name: "photo.jpg",
-      type: "image/jpeg"
-    });
     formData.append("userId", userId);
 
-    const res = await fetch(`${BASE_URL}/upload-photo`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    try {
+      const res = await fetch(`${BASE_URL}/upload-pfp`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const text = await res.text(); // 🔄 Try text first
+      if (!res.ok) {
+        console.error("❌ Upload failed:", text);
+        return;
       }
+
+      const data = JSON.parse(text); // ✅ now safe to parse
+      console.log("✅ Upload success:", data);
+      // ✅ Immediately update UI
+      // setUploadedUrl(`${BASE_URL}/uploads/${data.filename}`);
+    } catch (error) {
+      console.error("❌ Upload error:", error);
+    }
+
+  };
+
+  const handleAddPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      quality: 0.8,
     });
 
-    const data = await res.json();
-    console.log("Photo uploaded:", data);
-    fetchUserPhotos(); // refresh UI
-  }
-};
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets[0].uri;
+      const formData = new FormData();
 
-const fetchUserPhotos = async () => {
-  try {
-    const res = await fetch(`${BASE_URL}/user-photos/${userId}`);
-    const data = await res.json();
-    setPhotos(data.map(item => `${BASE_URL}/${item.image_path}`));
-  } catch (error) {
-    console.error("Failed to fetch photos", error);
-  }
-};
-useEffect(() => {
-  if (userId) fetchUserPhotos();
-}, [userId]);
+      formData.append("image", {
+        uri,
+        name: "photo.jpg",
+        type: "image/jpeg"
+      });
+      formData.append("userId", userId);
 
-useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/user/${userId}`);
+      const res = await fetch(`${BASE_URL}/upload-photo`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+
       const data = await res.json();
-
-      if (data.profile_image) {
-        setUploadedUrl(`${BASE_URL}${data.profile_image}`);
-      }
-      console.log(data.Name);
-      if (data.Name) {
-         setUserName(data.Name);  // Use exact column name from SQL
-      }
-      console.log(data.Bio);
-      if(data.Bio){
-        setBio(data.Bio);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.log("Photo uploaded:", data);
+      fetchUserPhotos(); // refresh UI
     }
   };
 
-  if (userId) fetchUserData();
-}, [userId]);
+  const fetchUserPhotos = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/user-photos/${userId}`);
+      const data = await res.json();
+      setPhotos(data.map(item => `${BASE_URL}/${item.image_path}`));
+    } catch (error) {
+      console.error("Failed to fetch photos", error);
+    }
+  };
+  useEffect(() => {
+    if (userId) fetchUserPhotos();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/user/${userId}`);
+        const data = await res.json();
+
+        if (data.profile_image) {
+          setUploadedUrl(`${BASE_URL}${data.profile_image}`);
+        }
+        console.log(data.Name);
+        if (data.Name) {
+          setUserName(data.Name);  // Use exact column name from SQL
+        }
+        console.log(data.Bio);
+        if (data.Bio) {
+          setBio(data.Bio);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    if (userId) fetchUserData();
+  }, [userId]);
 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.rowLayout}>
         {/* 🔘 Change Picture */}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={styles.sideButton}>Change Picture</Text>
+        <TouchableOpacity
+          style={[styles.loginButton]}
+          onPress={() => setModalVisible(true)} >
+          <Text style={styles.loginText}>Change Picture</Text>
         </TouchableOpacity>
 
         {/* 🖼️ Profile Image */}
         <View style={styles.profileCircle}>
           <Image
-        source={
-          uploadedUrl
-            ? { uri: uploadedUrl }
-            : selectedImage
-            ? { uri: selectedImage }
-            : require('../../assets/images/pfp.png')
-        }
-        style={styles.profileImage}
-      />
+            source={
+              uploadedUrl
+                ? { uri: uploadedUrl }
+                : selectedImage
+                  ? { uri: selectedImage }
+                  : require('../../assets/images/pfp.png')
+            }
+            style={styles.profileImage}
+          />
         </View>
 
         {/* 🔘 Edit Profile */}
-        <TouchableOpacity onPress={() => router.push('/editProfile')}>
-          <Text style={styles.sideButton}>Edit Profile</Text>
+        <TouchableOpacity
+          style={[styles.loginButton]}
+          onPress={() => router.push('/editProfile')}>
+          <Text style={styles.loginText}>Edit Profile</Text>
         </TouchableOpacity>
+
       </View>
       {/* Username and rest */}
       <Text style={styles.username}>{userName}</Text>
@@ -187,29 +192,29 @@ useEffect(() => {
       {/* Photos tab */}
       <View style={styles.photosTab}>
         <Text style={styles.photosTabText}>Photos</Text>
-        <TouchableOpacity onPress={handleAddPhoto}>
+        <TouchableOpacity style={[styles.addButtonContainer, { backgroundColor: '#008000' }]} onPress={handleAddPhoto}>
           <Text style={styles.addPhotoButton}>＋</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.photoGrid}>
-  {photos.map((uri, idx) => (
-    <TouchableOpacity
-      key={idx}
-      onPress={() => {
-        setPreviewImageUri(uri);
-        setPreviewVisible(true);
-      }}
-    >
-      <View style={styles.photoBox}>
-        <Image source={{ uri }} style={styles.photos} />
+        {photos.map((uri, idx) => (
+          <TouchableOpacity
+            key={idx}
+            onPress={() => {
+              setPreviewImageUri(uri);
+              setPreviewVisible(true);
+            }}
+          >
+            <View style={styles.photoBox}>
+              <Image source={{ uri }} style={styles.photos} />
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
-    </TouchableOpacity>
-  ))}
-</View>
 
       {/* 🔳 Popup Modal */}
-       <Modal
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -225,19 +230,19 @@ useEffect(() => {
       </Modal>
 
       {/*Photo*/}
-        <Modal
-          visible={previewVisible}
-          transparent={true}
-          onRequestClose={() => setPreviewVisible(false)}
-        >
-          <View style={styles.fullScreenModal}>
-            <Image source={{ uri: previewImageUri }} style={styles.fullImage} />
-            <TouchableOpacity onPress={() => setPreviewVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-    </ScrollView>
+      <Modal
+        visible={previewVisible}
+        transparent={true}
+        onRequestClose={() => setPreviewVisible(false)}
+      >
+        <View style={styles.fullScreenModal}>
+          <Image source={{ uri: previewImageUri }} style={styles.fullImage} />
+          <TouchableOpacity onPress={() => setPreviewVisible(false)} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </ScrollView >
   );
 };
 
@@ -313,7 +318,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     borderBottomColor: '#000',
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
     paddingTop: 20,
     paddingLeft: 15,
     paddingRight: 15,
@@ -321,10 +326,13 @@ const styles = StyleSheet.create({
   },
   photosTabText: {
     fontSize: 16,
-    // fontWeight: '500',
-    color: "#000",
+    fontWeight: '500',
+    color: "black",
     // textDecorationLine:'underline', 
-    fontFamily: 'Instagram Sans Bold.ttf'
+    fontFamily: 'Instagram Sans Bold.ttf',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
   },
   photoGrid: {
     flexDirection: 'row',
@@ -333,7 +341,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 20,
     gap: 10,                     // ✅ spacing between boxes
-},
+  },
   photoBox: {
     width: 100,
     height: 100,
@@ -341,70 +349,96 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#ccc',
-},
+  },
   photos: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-},
+  },
   modalBackground: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  backgroundColor: 'rgba(0,0,0,0.5)',
-},
-modalContainer: {
-  width: 300,
-  backgroundColor: 'white',
-  padding: 20,
-  borderRadius: 10,
-  elevation: 10,
-  alignItems: 'center',
-},
-rowLayout: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  paddingHorizontal: 20,
-  marginBottom: 20,
-  gap: 10,
-},
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: 300,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 10,
+    alignItems: 'center',
+  },
+  rowLayout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    gap: 10,
+  },
 
-sideButton: {
-  fontSize: 14,
-  color: '#333',
-  textDecorationLine: 'underline',
-  maxWidth: 80,
-  textAlign: 'center',
-},
-    addPhotoButton: {
-      fontSize: 24,
-      marginLeft: 10,
-      color: '#28a745',
-    },
+  sideButton: {
+    fontSize: 14,
+    color: '#333',
+    textDecorationLine: 'underline',
+    maxWidth: 80,
+    textAlign: 'center',
+  },
+  addButtonContainer: {
+    backgroundColor: '#008000',
+    padding: 5,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  addPhotoButton: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginLeft: 1,
+    color: '#fff',
+  },
 
-fullScreenModal: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-fullImage: {
-  width: '90%',
-  height: '70%',
-  resizeMode: 'contain',
-  borderRadius: 10,
-},
-closeButton: {
-  marginTop: 20,
-  padding: 10,
-  backgroundColor: '#fff',
-  borderRadius: 5,
-},
-closeButtonText: {
-  fontSize: 16,
-  color: '#000',
-},
+  fullScreenModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '90%',
+    height: '70%',
+    resizeMode: 'contain',
+    borderRadius: 10,
+  },
+  closeButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  loginButton: {
+    backgroundColor: '#008000',
+    padding: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  loginText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
 });
 
 export default ProfilePage;
