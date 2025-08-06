@@ -701,7 +701,7 @@ app.post('/api/get-user-profile', (req, res) => {
           }
         });
       } else {
-        const retrieveAll = `SELECT * FROM users;`
+        const retrieveAll = `SELECT * FROM users where id!=?;`
         const retrieveUserQuery = `SELECT DISTINCT
   u.id AS userId, u.name as name, u.email, u.profile_image
 FROM

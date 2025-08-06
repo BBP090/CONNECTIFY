@@ -7,6 +7,9 @@ import FeedTags from '../../components/FeedTags';
 import { useAuth } from '@clerk/clerk-expo';
 import useGetUserID from '../hooks/useGetUserID';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
+import { useFocusEffect } from '@react-navigation/native'; 
+import { useCallback } from 'react';
+
 
 // const placeHolderImage = require("../../assets/image/background.png");
 const smallImgSource = require("../../assets/images/background.png");
@@ -30,7 +33,8 @@ export default function Home() {
     console.log('selected tags:', selectedTags);
 
     // to retrieve tags dynamically 
-    useEffect(() => {
+  useFocusEffect(
+     useCallback(() => {
         const retrieveTags = async () => {
             setLoading(true);
             try {
@@ -60,7 +64,7 @@ export default function Home() {
         };
 
         retrieveTags();
-    }, []);
+    }, []));
 
     // to retrieve user profile
     useEffect(() => {
