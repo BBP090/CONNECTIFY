@@ -53,13 +53,13 @@ export default function ViewProfile() {
 
   return (
     <>
-      <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 15 }}>
+      <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 40 }}>
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
           <Ionicons name="chevron-back-outline" size={31} color="black" />
         </TouchableOpacity>
         <View style={{ alignItems: "center" }}>
-          <Text style={[styles.heading]}>Settings</Text>
+          <Text style={[styles.heading]}>Home</Text>
         </View>
       </View>
 

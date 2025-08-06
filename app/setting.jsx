@@ -67,7 +67,7 @@ export default function SettingsScreen() {
   return (
 
     <>
-      <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 15 }}>
+      <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 40 }}>
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/profile')}>
           <Ionicons name="chevron-back-outline" size={31} color="black" />
@@ -216,7 +216,8 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: "500",
-    paddingLeft: 10
+    paddingLeft: 5,
+    // marginTop: 20,
     // marginBottom: 30,
     // textAlign: "center",
   },

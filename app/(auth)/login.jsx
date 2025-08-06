@@ -136,6 +136,7 @@ export default function LoginScreen() {
           placeholder="Enter your email"
           style={styles.input}
           value={email}
+          autoCapitalize={false}
           onChangeText={setEmail}
           keyboardType="email-address"
         />
