@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ForgotPasswordScreen from '../../components/ForgotPasswordScreen';
 import { BASE_URL } from "../../config/config"; // adjust the path as needed
-import { ActivityIndicator } from 'react-native-web';
+import { ActivityIndicator } from 'react-native';
 
 export default function LoginScreen() {
   const { getToken } = useAuth();

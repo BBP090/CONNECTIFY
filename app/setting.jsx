@@ -55,7 +55,7 @@ export default function SettingsScreen() {
   };
 
 
-  const updateAddress=  ()=>{
+  const updateAddress = () => {
     // router.push(`/map`);
   }
 
@@ -78,47 +78,32 @@ export default function SettingsScreen() {
       </View>
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: bgColor }]}>
 
+        <TouchableOpacity
+          style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
+          onPress={() => {
+            // Add your handler here
+            console.log("Update Preferences");
+          }}
+        >
+          <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
+            onPress={() => router.push('/update_preferences')}>
+            Update Preferences
+          </Text>
+        </TouchableOpacity>
 
-
-
-
-
-
-
-       
-  <TouchableOpacity
-    style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
-    onPress={() => {
-      // Add your handler here
-      console.log("Update Preferences");
-    }}
-  >
-    <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
-    onPress={() => router.push('/update_preferences')}>
-      Update Preferences
-    </Text>
-  </TouchableOpacity>
-
-
-
-
-
-
-
-
-         {/* Update Temporary Address Button */}
-  <TouchableOpacity
-    style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
-    onPress={() => {
-      // Add your handler here
-      console.log("Update Temporary Address button pressed");
-    }}
-  >
-    <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
-    onPress={() => router.push('/map')}>
-      Update Temporary Address
-    </Text>
-  </TouchableOpacity>
+        {/* Update Temporary Address Button */}
+        <TouchableOpacity
+          style={[styles.optionRow, { backgroundColor: '#0066cc', borderColor: '#0066cc', marginBottom: 15 }]}
+          onPress={() => {
+            // Add your handler here
+            console.log("Update Temporary Address button pressed");
+          }}
+        >
+          <Text style={[styles.optionText, { color: '#fff', textAlign: 'center', flex: 1 }]}
+            onPress={() => router.push('/map')}>
+            Update Temporary Address
+          </Text>
+        </TouchableOpacity>
 
         {/* Change Password Option */}
         {/* <TouchableOpacity

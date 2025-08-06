@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from 'expo-router';
 import { BASE_URL } from '../config/config';
+import { router } from 'expo-router';
 // import { router } from 'expo-router';
 // import { Ionicons } from '@expo/vector-icons'; // Make sure expo/vector-icons is installed
 
@@ -50,33 +52,52 @@ export default function ViewProfile() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.profileSection}>
-        <Image
-          source={
-            userData.profile_image
-              ? { uri: `${BASE_URL}${userData.profile_image}` }
-              : require('../assets/images/pfp.png')
-          }
-          style={styles.profileImage}
-        />
-        <Text style={styles.username}>{userData.Name}</Text>
-        <Text style={styles.bio}>{userData.Bio}</Text>
+    <>
+      <View style={{ flexDirection: "row", alignItems: 'center', marginVertical: 15 }}>
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
+          <Ionicons name="chevron-back-outline" size={31} color="black" />
+        </TouchableOpacity>
+        <View style={{ alignItems: "center" }}>
+          <Text style={[styles.heading]}>Settings</Text>
+        </View>
       </View>
 
-      <Text style={styles.photosTitle}>Photos</Text>
-      <View style={styles.photoGrid}>
-        {photos.map((uri, idx) => (
-          <View key={idx} style={styles.photoBox}>
-            <Image source={{ uri }} style={styles.photo} />
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.profileSection}>
+          <Image
+            source={
+              userData.profile_image
+                ? { uri: `${BASE_URL}${userData.profile_image}` }
+                : require('../assets/images/pfp.png')
+            }
+            style={styles.profileImage}
+          />
+          <Text style={styles.username}>{userData.Name}</Text>
+          <Text style={styles.bio}>{userData.Bio}</Text>
+        </View>
+
+        <Text style={styles.photosTitle}>Photos</Text>
+        <View style={styles.photoGrid}>
+          {photos.map((uri, idx) => (
+            <View key={idx} style={styles.photoBox}>
+              <Image source={{ uri }} style={styles.photo} />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  heading: {
+    fontSize: 20,
+    fontWeight: "500",
+    paddingLeft: 5
+    // marginBottom: 30,
+    // textAlign: "center",
+  },
   container: {
     alignItems: 'center',
     paddingVertical: 30,
