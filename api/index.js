@@ -1,7 +1,9 @@
+const { BASE_URL } = require("../config/config");
 const express = require("express");
 const bodyParser = require("body-parser");
 const db = require('./database');
-
+const path = require('path');
+const multer = require("multer");
 const http = require("http");
 const socketIo = require("socket.io");
 const app = express();
@@ -16,10 +18,29 @@ app.use(express.json());
 
 const port = 8000;
 const cors = require("cors");
+// const { BounceIn } = require("react-native-reanimated");
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// Disk storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Make sure this directory exists
+  },
+  filename: function (req, file, cb) {
+    const filename = Date.now() + '-' + file.originalname;
+    cb(null, filename);
+  }
+});
+
+const upload = multer({ storage });
+
+// <<<<<<< HEAD
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// <<<<<<< HEAD
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Listen for connection
 io.on("connection", (socket) => {
@@ -109,6 +130,50 @@ io.on("connection", (socket) => {
 server.listen(port, () => {
   console.log(` Server + Socket.IO running on http://localhost:${port}`);
 });
+
+
+
+// // Disk storage config
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/'); // Make sure this directory exists
+//   },
+//   filename: function (req, file, cb) {
+//     const filename = Date.now() + '-' + file.originalname;
+//     cb(null, filename);
+//   }
+// });
+
+
+// const upload = multer({ storage });
+
+app.post('/upload-img', upload.single('img'), async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const chatId = req.body.chatId;
+
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: "No file uploaded" });
+
+    const imagePath = `/uploads/${file.filename}`;
+
+    // Insert message into DB as an image message
+    const [result] = await db.promise().query(
+      `INSERT INTO messages (chat_id, sender_id, message_type, message, image_url) VALUES (?, ?, 'image',? ,?)`,
+      [chatId, userId, '', imagePath]
+    );
+
+    // Respond with image URL and inserted message ID (optional)
+    res.json({ imageUrl: imagePath, messageId: result.insertId });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+
 
 
 app.post('/get-user-id', (req, res) => {
@@ -371,50 +436,45 @@ app.post("/api/user/preferences", (req, res) => {
   });
 });
 
+app.post("/api/change_preference", (req, res) => {
+  const { userId, preferences } = req.body;
+
+  const values = preferences.map((element) => [userId, element]);
+
+  if (!userId || !preferences) {
+    return res.status(400).json({ error: "User ID and preferences are required." });
+  }
+
+  db.query(`DELETE FROM preferences WHERE user_id = ?;`, [userId], (err, result) => {
+    if (err) {
+      console.error('Error deleteing from prefernece');
+      return res.status(500).json({ error: "Failed to delete preferences" });
+    }
+    db.query(`INSERT INTO preferences (user_id, preference) VALUES ?`, [values], (err, result) => {
+      if (err) {
+        console.error("Error inserting preferences:", err);
+        return res.status(500).json({ error: "Failed to save preferences" });
+      }
+      res.status(200).json({ success: true, message: "Preferences saved successfully" });
+      console.log(result);
+    })
+  })
+})
+
 
 app.post('/api/get-user-profile', (req, res) => {
   const userId = req.body.userId;
   const tags = req.body.tags;
+  const getUserLocation = `
+    SELECT latitude, longitude FROM users WHERE id = ? LIMIT 1;
+  `;
 
-  console.log('tags:', tags);
-
-  if (!userId && !tags)
-    return res.status(500).jsom({ error: 'userId and Tags are required!!!!' });
-
-  if (tags && tags.length) {
-    const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
-    const retrieveUserQuery = `SELECT DISTINCT u.id AS userId, u.email FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders}) AND u.id != ?;`;
-
-    db.query(retrieveUserQuery, [...tags, userId], (err, result) => {
-      if (err) {
-        console.error('error:', err);
-        return res.status(500).json({ error: 'Failed to retrieve user profile by tags.' });
-      }
-
-      console.log("Query results:", result.length, "users profiles that match the tag found.");
-
-      if (result.length === 0) {
-        return res.status(200).json({ message: 'No user profiles matching the tags.' })
-      } else {
-        console.log("User profiles retrieved matching the tags:", result);
-        res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
-      }
-    });
-  } else {
-    const retrieveAll = `SELECT id, email FROM users where id != ?;`;
-    const retrieveUserQuery = `SELECT DISTINCT 
-  u.id AS userId,
-  u.email
-FROM 
-  preferences p
-JOIN 
-  users u ON p.user_id = u.id
-WHERE 
-  p.preference IN (
-    SELECT preference 
-    FROM preferences 
-    WHERE user_id = ?
-  )
+  db.query(getUserLocation, [userId], (err, results) => {
+    if (err || results.length === 0) {
+      //full og query
+      if (tags && tags.length) {
+        const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
+        const retrieveUserQuery = `SELECT DISTINCT u.id AS userId, u.name as name ,u.email FROM preferences p JOIN users u ON p.user_id = u.id WHERE p.preference IN (${placeholders})
   AND u.id != ?
   AND u.id NOT IN (
     SELECT to_user_id 
@@ -429,48 +489,200 @@ WHERE
       END
     FROM ongoing_chats
     WHERE user1_id = ? OR user2_id = ?
-  );`;
+  )
+`;
 
-    //     const retrieveUserQuery = `SELECT DISTINCT
-    //   u.id AS userId, 
-    //   u.email
-    // FROM
-    //   preferences p 
-    // JOIN 
-    //   users u ON p.user_id = u.id 
-    // WHERE 
-    //   (
-    //     p.preference IN (
-    //       SELECT preference 
-    //       FROM preferences 
-    //       WHERE user_id = ?
-    //       )
-    //   )
-    //   AND u.id != ?;`
-    db.query(retrieveUserQuery, [userId, userId, userId, userId, userId, userId, userId], (err, result) => {
-      if (err) {
-        console.error('error:', err);
-        return res.status(500).json({ error: 'Failed to retrieve user profile.' });
-      }
+        db.query(retrieveUserQuery, [...tags, userId, userId, userId, userId, userId, userId], (err, result) => {
+          if (err) {
+            console.error('error:', err);
+            return res.status(500).json({ error: 'Failed to retrieve user profile by tags.' });
+          }
 
-      console.log("Query results:", result.length, "users profiles found");
+          console.log("Query results:", result.length, "users profiles that match the tag found.");
 
-      // if (result.length === 0) {
-      //   db.query(retrieveAll, [userId], (err, result) => {
-      //     if (err) {
-      //       console.error('error:', err);
-      //       return res.status(500).json({ error: 'Failed to retrieve user profile.' });
-      //     }
-      //     console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
-      //     return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
-      //   })
+          if (result.length === 0) {
+            return res.status(200).json({ message: 'No user profiles matching the tags.' })
+          } else {
+            console.log("User profiles retrieved matching the tags:", result);
+            return res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
+          }
+        });
+      } else {
+        const retrieveAll = `SELECT * FROM users;`
+        const retrieveUserQuery = `SELECT DISTINCT
+  u.id AS userId, u.name as name ,
+  u.email
+FROM
+  preferences p 
+JOIN 
+  users u ON p.user_id = u.id 
+WHERE p.preference IN (
+  SELECT preference FROM preferences WHERE user_id = ?
+)
+  AND u.id != ?
+  AND u.id NOT IN (
+    SELECT to_user_id 
+    FROM message_requests 
+    WHERE from_user_id = ? AND status = 'sent'
+  )
+  AND u.id NOT IN (
+    SELECT 
+      CASE 
+        WHEN user1_id = ? THEN user2_id
+        WHEN user2_id = ? THEN user1_id
+      END
+    FROM ongoing_chats
+    WHERE user1_id = ? OR user2_id = ?
+  )
+`
+        db.query(retrieveUserQuery, [userId, userId, userId, userId, userId, userId, userId], (err, result) => {
+          if (err) {
+            console.error('error:', err);
+            return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+          }
 
-      // } else {
-      console.log("User Profiles Retrieved:", result);
-      res.status(200).json({ message: 'User Profiles Retrieved', result });
-      // }
-    });
-  }
+          console.log("Query results:", result.length, "users profiles found");
+
+          if (result.length === 0) {
+            db.query(retrieveAll, (err, result) => {
+              if (err) {
+                console.error('error:', err);
+                return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+              }
+              console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
+              return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
+            })
+
+          } else {
+            console.log("User Profiles Retrieved:", result);
+            return res.status(200).json({ message: 'User Profiles Retrieved', result });
+          }
+        });
+      }//
+    }
+
+
+    const { latitude, longitude } = results[0];
+
+
+    console.log('tags:', tags);
+
+    if (!userId && !tags)
+      return res.status(500).json({ error: 'userId and Tags are required!!!!' });
+
+    if (tags && tags.length) {
+      const placeholders = tags.map(() => '?').join(','); // ?, ?, ?
+      const retrieveUserQuery = ` SELECT distinct u.id AS userId, u.name as name ,u.email, u.latitude, u.longitude,
+          (CASE 
+            WHEN u.latitude IS NOT NULL AND u.longitude IS NOT NULL THEN
+              (6371 * acos(
+                cos(radians(?)) * cos(radians(u.latitude)) *
+                cos(radians(u.longitude) - radians(?)) +
+                sin(radians(?)) * sin(radians(u.latitude))
+              ))
+            ELSE NULL
+          END) AS distance
+        FROM preferences p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.preference IN (${placeholders})
+  AND u.id != ?
+  AND u.id NOT IN (
+    SELECT to_user_id 
+    FROM message_requests 
+    WHERE from_user_id = ? AND status = 'sent'
+  )
+  AND u.id NOT IN (
+    SELECT 
+      CASE 
+        WHEN user1_id = ? THEN user2_id
+        WHEN user2_id = ? THEN user1_id
+      END
+    FROM ongoing_chats
+    WHERE user1_id = ? OR user2_id = ?
+  )
+
+        
+        ORDER BY
+          CASE WHEN distance IS NULL THEN 1 ELSE 0 END,
+          distance ASC;`;
+
+      db.query(retrieveUserQuery, [latitude, longitude, latitude, ...tags, userId, userId, userId, userId, userId, userId], (err, result) => {
+        if (err) {
+          console.error('error:', err);
+          return res.status(500).json({ error: 'Failed to retrieve user profile by tags.' });
+        }
+
+        console.log("Query results:", result.length, "users profiles that match the tag found.");
+
+        if (result.length === 0) {
+          return res.status(200).json({ message: 'No user profiles matching the tags.' })
+        } else {
+          console.log("User profiles retrieved matching the tags:", result);
+          res.status(200).json({ message: 'User Profiles Retrieved by Tags', result });
+        }
+      });
+    } else {
+      const retrieveAll = `SELECT * FROM users where id!=?;`
+      const retrieveUserQuery = `SELECT distinct u.id AS userId, u.name as name ,u.email, u.latitude, u.longitude,
+          (CASE 
+            WHEN u.latitude IS NOT NULL AND u.longitude IS NOT NULL THEN
+              (6371 * acos(
+                cos(radians(?)) * cos(radians(u.latitude)) *
+                cos(radians(u.longitude) - radians(?)) +
+                sin(radians(?)) * sin(radians(u.latitude))
+              ))
+            ELSE NULL
+          END) AS distance
+        FROM preferences p
+        JOIN users u ON p.user_id = u.id
+       WHERE p.preference IN (
+  SELECT preference FROM preferences WHERE user_id = ?
+)
+  AND u.id != ?
+  AND u.id NOT IN (
+    SELECT to_user_id 
+    FROM message_requests 
+    WHERE from_user_id = ? AND status = 'sent'
+  )
+  AND u.id NOT IN (
+    SELECT 
+      CASE 
+        WHEN user1_id = ? THEN user2_id
+        WHEN user2_id = ? THEN user1_id
+      END
+    FROM ongoing_chats
+    WHERE user1_id = ? OR user2_id = ?
+  )
+
+        
+        ORDER BY
+          CASE WHEN distance IS NULL THEN 1 ELSE 0 END,
+          distance ASC;`
+      db.query(retrieveUserQuery, [latitude, longitude, latitude, userId, userId, userId, userId, userId, userId, userId], (err, result) => {
+        if (err) {
+          console.error('error:', err);
+          return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+        }
+
+        console.log("Query results:", result.length, "users profiles found");
+
+        if (result.length === 0) {
+          db.query(retrieveAll, [userId], (err, result) => {
+            if (err) {
+              console.error('error:', err);
+              return res.status(500).json({ error: 'Failed to retrieve user profile.' });
+            }
+            console.log("Query results:", result.length, "users profiles found (when no preferences selected)");
+            return res.status(200).json({ message: 'All users profiles retrieved (when no preferences selected)', result })
+          })
+
+        } else {
+          console.log("User Profiles Retrieved:", result);
+          res.status(200).json({ message: 'User Profiles Retrieved', result });
+        }
+      });
+    }
+  });
 });
 
 app.get('/api/get-tags', (req, res) => {
@@ -486,3 +698,145 @@ app.get('/api/get-tags', (req, res) => {
     return res.status(200).json({ message: 'Tags Retrieved', arrayOfTags });
   })
 })
+
+app.post('/set_location', (req, res) => {
+  const { userId, latitude, longitude } = req.body;
+  db.query(`
+    Update users set latitude=?, longitude=? where id=?
+    `, [latitude, longitude, userId], (err) => {
+    if (err) return res.status(500).send("Failed");
+    res.sendStatus(200);
+  })
+})
+app.post('/update-user-by-id', (req, res) => {
+  const { userId, userName, dob, gender, address, contact, bio } = req.body;
+
+  if (!userId || !userName || !dob || !gender || !address || !contact) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  const query = `
+    UPDATE users 
+    SET Name = ?, dob = ?, gender = ?, address = ?, contact = ?, Bio = ?
+    WHERE id = ?
+  `;
+
+  const values = [userName, dob, gender, address, contact, bio, userId];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User profile updated successfully" });
+  });
+});
+
+app.post('/get-user-by-id', (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) return res.status(400).json({ error: "User ID is required" });
+
+  const query = 'SELECT Name, dob, gender, address, contact, Bio FROM users WHERE id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("DB error:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.status(200).json(results[0]);
+  });
+});
+
+
+
+
+app.post('/upload-pfp', upload.single('pfp'), (req, res) => {
+  const userId = req.body.userId;
+  const file = req.file;
+
+  console.log("userId:", userId);
+  console.log("uploaded file:", file);
+
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  const imagePath = `/uploads/${file.filename}`; // relative path to serve later
+
+  const query = `UPDATE users SET profile_image = ? WHERE id = ?`;
+  db.query(query, [imagePath, userId], (err, result) => {
+    if (err) {
+      console.error("DB error while updating image:", err);
+      return res.status(500).json({ error: 'Failed to update profile image in database' });
+    }
+
+    res.status(200).json({
+      message: 'Image uploaded and profile updated successfully',
+      url: `${BASE_URL}${imagePath}`
+    });
+  });
+});
+
+//Retrieve profile info
+app.get('/user/:id', (req, res) => {
+  const userId = req.params.id;
+
+  const query = 'SELECT Name, dob, gender, address, contact, profile_image, Bio FROM users WHERE id = ?';
+
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+
+    if (results.length === 0) return res.status(404).json({ error: "User not found", err });
+
+    return res.status(200).json(results[0]);
+  });
+});
+
+//Multiphoto upload
+app.post('/upload-photo', upload.single('image'), (req, res) => {
+  const { userId } = req.body;
+
+  if (!req.file || !userId) {
+    return res.status(400).json({ error: 'Missing file or userId' });
+  }
+
+  const imagePath = `uploads/${req.file.filename}`;
+  const sql = `INSERT INTO user_photos (user_id, image_path) VALUES (?, ?)`;
+
+  db.query(sql, [userId, imagePath], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+
+    return res.status(200).json({
+      message: 'Photo uploaded',
+      imagePath: imagePath,
+    });
+  });
+});
+
+//Retrieve Photo
+app.get('/user-photos/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const sql = `SELECT image_path FROM user_photos WHERE user_id = ?`;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+
+    res.status(200).json(results);
+  });
+});

@@ -424,7 +424,12 @@ useEffect(() => {
       />
 
       <Modal visible={showModal} transparent animationType="fade">
+        <TouchableWithoutFeedback onPress={() => {
+    setShowModal(false);
+    setSelectedRequest(null);
+  }}>
         <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
               Accept message from {selectedRequest?.name}?
@@ -438,7 +443,9 @@ useEffect(() => {
               </TouchableOpacity>
             </View>
           </View>
+          </TouchableWithoutFeedback>
         </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* First Modal: Ask to delete */}

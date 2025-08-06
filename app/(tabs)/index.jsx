@@ -139,9 +139,10 @@ export default function Home() {
                                 sentBy={userId}
                                 sentTo={user.userId}
                                 key={user.userId}
+                                userName= {user.name}
                                 smallImgSource={smallImgSource}
                                 profileFeedImgSource={profileFeedImgSource}
-                                userName={user.userId}
+                                
                             />
                         )
                     }) : null
