@@ -56,7 +56,7 @@ export default function SettingsScreen() {
 
 
   const updateAddress=  ()=>{
-    router.push(`/map`);
+    // router.push(`/map`);
   }
 
   const bgColor = darkMode ? "#000" : Colors.white;

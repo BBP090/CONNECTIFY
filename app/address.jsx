@@ -26,6 +26,6 @@ export default function SetTemporaryAddress() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 20 },
-  question: { fontSize: 18, textAlign: 'center', marginBottom: 20 },
+  question: { fontSize: 22, textAlign: 'center', marginBottom: 150 },
   buttonContainer: { flexDirection: 'row', justifyContent: 'space-around' },
 });

@@ -86,6 +86,7 @@ export default function Home() {
                 const data = await response.json();
 
                 setUsers(data.result);
+                console.log(data.result[0].profile_image);
                 // setLoading(false);
 
                 if (!response.ok) {
@@ -123,7 +124,7 @@ export default function Home() {
     return (
         <>
             {/* { */}
-                {/* // loading && <ActivityIndicator color="#FFFFFF" /> */}
+            {/* // loading && <ActivityIndicator color="#FFFFFF" /> */}
             {/* } */}
             <View style={styles.tagsContainer}>
                 <FeedTags tags={tags} checker={checker} issSelected={issSelected} />
@@ -133,16 +134,17 @@ export default function Home() {
             >
                 {
                     users?.length ? users.map((user) => {
-                        console.log(user.userId)
+                        console.log(user.id)
+                        console.log(`${BASE_URL}${user.profile_image}`);
+                        const userid = user.id;
                         return (
                             <UserProfileFeed
+                                key={user.id}
                                 sentBy={userId}
-                                sentTo={user.userId}
-                                key={user.userId}
-                                userName= {user.name}
-                                smallImgSource={smallImgSource}
-                                profileFeedImgSource={profileFeedImgSource}
-                                
+                                sentTo={userid}
+                                userName={user.name}
+                                smallImgSource={{ uri: `${BASE_URL}${user.profile_image}` }}
+                                profileFeedImgSource={{ uri: `${BASE_URL}${user.profile_image}` }}
                             />
                         )
                     }) : null

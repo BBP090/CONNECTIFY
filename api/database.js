@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 
-alter table users add column DoB DATE;
-alter table ongoing_chats add column last_message1 int;
-alter table ongoing_chats add column last_message2 int;
+-- alter table users add column DoB DATE;
+-- alter table ongoing_chats add column last_message1 int;
+-- alter table ongoing_chats add column last_message2 int;
 ALTER TABLE users MODIFY name VARCHAR(255) NULL;
 
 CREATE TABLE IF NOT EXISTS user_photos (
@@ -63,8 +63,11 @@ CREATE TABLE IF NOT EXISTS preferences (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+
 `;
 
+// alter table users add longitude double;
+// alter table users add latitude double;
 
 // alter table ongoing_chats add column last_message1 int;
 // alter table ongoing_chats add column last_message2 int;

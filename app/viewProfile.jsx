@@ -1,148 +1,151 @@
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { BASE_URL } from '../config/config';
+// import { router } from 'expo-router';
+// import { Ionicons } from '@expo/vector-icons'; // Make sure expo/vector-icons is installed
 
-const router = useRouter();
-const ProfilePage = () => {
+
+
+export default function ViewProfile() {
+  const { userId } = useLocalSearchParams(); // received from router.push()
+  console.log('user viewing', userId);
+  const [userData, setUserData] = useState(null);
+  const [photos, setPhotos] = useState([]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/user/${userId}`);
+        const data = await res.json();
+        console.log('User data:', data);
+        setUserData(data);
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    };
+
+    const fetchUserPhotos = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/user-photos/${userId}`);
+        const data = await res.json();
+        setPhotos(data.map(item => `${BASE_URL}/${item.image_path}`));
+      } catch (error) {
+        console.error("Failed to fetch photos", error);
+      }
+    };
+
+    fetchUserData();
+    fetchUserPhotos();
+  }, [userId]);
+
+  if (!userData) {
+    return (
+      <View style={styles.center}>
+        <Text>Loading profile...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.profileCircle}>
-        <Image style={styles.profileImage} source={require("../assets/images/pfp.png")} />
-        
-        {/* edit profile button */}
-        {/* <TouchableOpacity>
-          <Text style={styles.editProfile} onPress={() => router.push('/editProfile')}>Edit Profile</Text>
-        </TouchableOpacity> */}
-      </View>
-      <Text style={styles.username}>Username</Text>
-
-      <TouchableOpacity style={styles.connectButton}>
-        <Text style={styles.connectText}>Connect</Text>
-        {/* <View style={styles.greenDot} /> */}
-      </TouchableOpacity>
-
-      <View style={styles.bioContainer}>
-        <Text>
-          Bio here
-        </Text>
+      <View style={styles.profileSection}>
+        <Image
+          source={
+            userData.profile_image
+              ? { uri: `${BASE_URL}${userData.profile_image}` }
+              : require('../assets/images/pfp.png')
+          }
+          style={styles.profileImage}
+        />
+        <Text style={styles.username}>{userData.Name}</Text>
+        <Text style={styles.bio}>{userData.Bio}</Text>
       </View>
 
-      <View style={styles.photosTab}>
-        <Text style={styles.photosTabText}>Photos</Text>
-      </View>
-
+      <Text style={styles.photosTitle}>Photos</Text>
       <View style={styles.photoGrid}>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../assets/images/emoji1.png")} />
-        </View>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../assets/images/emoji2.png")} />
-        </View>
-        <View style={styles.photoBox}>
-          <Image style={styles.photos} source={require("../assets/images/emoji3.png")} />
-        </View>
+        {photos.map((uri, idx) => (
+          <View key={idx} style={styles.photoBox}>
+            <Image source={{ uri }} style={styles.photo} />
+          </View>
+        ))}
       </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 30,
     backgroundColor: '#fff',
   },
-  profileCircle: {
-    flexDirection: 'row',
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: '#000',
-    marginBottom: 10,
+  },
+  profileSection: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    //borderWidth: 3,
+    borderWidth: 1,
     borderColor: '#000',
-    resizeMode: 'cover', // or 'contain'
-  },
-  editProfile: {
-    marginHorizontal: 10,
-    fontSize: 16,
-    color: '#333',
-    marginVertical: 5,
   },
   username: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 20,
+    marginTop: 10,
   },
-  connectButton: {
-    flexDirection: 'row',
-    backgroundColor: '#28a745',
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  connectText: {
-    color: '#fff',
-    fontSize: 16,
-    marginRight: 10,
-  },
-  greenDot: {
-    width: 10,
-    height: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  bioContainer: {
-    paddingHorizontal: 30,
-    marginBottom: 20,
-  },
-  bioText: {
+  bio: {
     fontSize: 14,
-    color: '#222',
     textAlign: 'center',
-    marginVertical: 2,
+    paddingHorizontal: 30,
+    marginTop: 5,
   },
-  photosTab: {
-    // backgroundColor:"#28a745",
-    width: '20%',
-    alignItems: 'center',
-    marginBottom: 10,
-    borderBottomColor: '#000',
-    borderBottomWidth: 1,
-    paddingTop: 20,
-    paddingLeft: 15,
-    paddingRight: 15,
-    paddingBottom: 5,
-  },
-  photosTabText: {
+  photosTitle: {
     fontSize: 16,
-    // fontWeight: '500',
-    color: "#000",
-    // textDecorationLine:'underline', 
-    fontFamily: 'Instagram Sans Bold.ttf'
+    marginBottom: 10,
+    fontWeight: '500',
   },
   photoGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexWrap: 'wrap',
+    gap: 10,
     paddingHorizontal: 20,
+    justifyContent: 'center',
   },
   photoBox: {
-    width: 130,
-    height: 150,
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
-  photos: {
-    width: 130,
-    height: 150,
-  }
-});
-
-export default ProfilePage;
+  photo: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 10,
+  },
+})

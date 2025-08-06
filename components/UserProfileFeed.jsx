@@ -4,12 +4,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import RequestButton from './RequestButton';
 import { BASE_URL } from "../config/config"; // adjust the path as needed
+import { router } from 'expo-router';
 
 // const placeHolderImage = require("../../assets/images/background.png");
 
 export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userName, profileFeedImgSource }) {
 
     const [status, setStatus] = useState(null);
+
+    console.log('user', sentTo);
 
     const sendRequest = async () => {
         try {
@@ -56,10 +59,14 @@ export default function UserProfileFeed({ sentBy, sentTo, smallImgSource, userNa
                         <View style={styles.profileTitleContainer}>
 
                             <Image source={smallImgSource} style={styles.profileSmallImage}></Image>
-                            <TouchableOpacity onPress={()=>router.push('/viewProfile')}>
-                                <View style={styles.profileUserNameContainer}>
-                                    <Text style={[styles.profileUserName]}>{userName}</Text>
-                                </View>
+                            <TouchableOpacity
+                                style={styles.profileUserNameContainer}
+                                onPress={() => router.push({
+                                    pathname: '/viewProfile',
+                                    params: { userId: sentTo.toString() }
+                                })}
+                            >
+                                <Text style={styles.profileUserName}>{userName}</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={{ flex: 1 }}>
